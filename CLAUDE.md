@@ -44,6 +44,7 @@ src/
     dashboard/                       # shell: TopHeader, BottomNav, SidebarNav, MobileDrawer
   lib/
     utils.ts                         # cn() helper (clsx + tailwind-merge)
+docs/design/                         # extended design system: tokens, UI kits, preview specimens
 ```
 
 Import alias `@/*` resolves to `src/*`.

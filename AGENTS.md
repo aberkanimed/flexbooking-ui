@@ -4,6 +4,15 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Design Reference
+
+Before writing any UI code for a page, check `docs/design/ui_kits/` for the high-fidelity interactive kit that covers it:
+
+- `docs/design/ui_kits/catalog-dashboard/` — Catalog Dashboard: Products/Services listing, search and status filters, add/edit sheets, mobile bottom nav, responsive layout. Entry point: `index.html`.
+- `docs/design/ui_kits/product-detail/` — Product Detail page: product header, 4-up rollup stats, service accordion with characteristics, workbench rail layout. Entry point: `index.html`.
+
+Individual components are documented as HTML specimens in `docs/design/preview/` (cards, badges, buttons, nav states, empty states, rollup stats, accordion, char-cards). Open the relevant `.html` file before implementing.
+
 ## Project-specific gotchas
 
 **Base UI primitives — not Radix UI**

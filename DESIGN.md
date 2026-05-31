@@ -17,6 +17,40 @@ All tokens live in `src/app/globals.css` under `:root`. Never hardcode colors.
 
 ---
 
+## Design Sources
+
+The extended design reference lives in `docs/design/`. Consult it before writing any new page or component.
+
+### UI kits — consult before coding a page
+
+| Kit | Path | Pages covered | What to look for |
+|-----|------|---------------|------------------|
+| Catalog Dashboard | `docs/design/ui_kits/catalog-dashboard/` | Products listing, Services listing | Responsive shell (top/bottom nav), search + status filter bar, card grid, add/edit sheets, mobile FAB, bottom sheet → modal → side-panel breakpoints |
+| Product Detail | `docs/design/ui_kits/product-detail/` | Product detail page | Product header, 4-up rollup stats row, service accordion with characteristics, workbench rail layout (stacked / side-by-side modes) |
+
+Each kit is a self-contained `index.html` — open it in a browser to interact with the layout at every breakpoint.
+
+### Preview specimens — individual components
+
+Located in `docs/design/preview/`. Key specimens:
+
+| File | Documents |
+|------|-----------|
+| `card-product.html`, `card-service.html` | ProductCard and ServiceCard anatomy |
+| `badges.html`, `data-badges.html` | Badge variants and data-label badges |
+| `rollup-stats.html` | 4-up stat tile row (icon, label, value) |
+| `accordion-service.html` | Service accordion open/close states |
+| `char-cards.html` | Characteristic cards inside the accordion |
+| `empty-state.html` | Empty state layout (icon + bold fact + quiet next step) |
+| `nav-states.html` | Top nav tab and bottom nav active/idle states |
+| `buttons.html`, `button-sizes.html` | Button variants and size scale |
+
+### Brand philosophy and content rules
+
+`docs/design/README.md` — brand context, visual foundations, and content fundamentals. The "Content & Copy" section below is drawn from it.
+
+---
+
 ## Color Tokens
 
 All tokens are in `oklch()` color space. Reference via Tailwind utilities (`bg-primary`, `text-muted-foreground`, etc.) or CSS variables (`var(--primary)`).
@@ -246,6 +280,19 @@ Empty state (when no items)
 ```tsx
 className="bg-sidebar-accent text-sidebar-accent-foreground rounded-xl"
 ```
+
+---
+
+## Content & Copy
+
+FlexBooking copy is sparse, plain, and operator-facing. Follow these rules on every page.
+
+- **Voice:** neutral and direct; labels are nouns (`Products`, `Base price`); helper text uses light second person (`"Products you add will appear here."`). No "we," no exclamation marks.
+- **Casing:** sentence case everywhere — headings, buttons, empty states. The **only** uppercase is the tiny tracked eyebrow/group label (`CATALOG`, `BASE PRICE`). Never Title Case on sentences.
+- **Counts:** spelled out and pluralized correctly: `"1 product in your catalog"` / `"12 services in your catalog"` / `"No products yet."` Never `"Products (2)"`.
+- **Empty states:** two lines — a bold fact (`"No products found"`) followed by a quiet next step (`"Products you add will appear here."`). Never blamey or cute.
+- **Money:** format with `Intl.NumberFormat` as USD, two decimals, tabular figures (`$189.00`). Prices are stored in cents — divide by 100 at the display edge.
+- **Never use:** emoji, exclamation marks, or jargon.
 
 ---
 
