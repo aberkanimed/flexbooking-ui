@@ -3,6 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 @AGENTS.md
+@DESIGN.md
 
 ## Commands
 
@@ -29,18 +30,32 @@ npx shadcn@latest add <component-name>
 
 ```
 src/
-  app/           # routes (App Router file conventions)
+  app/
+    layout.tsx                       # root layout — font loading (Hanken Grotesk, Bricolage Grotesque)
+    globals.css                      # Tailwind v4 @theme — all design tokens
+    dashboard/
+      layout.tsx                     # shell: TopHeader + main + BottomNav
+      catalog/
+        products/page.tsx
+        services/page.tsx
   components/
-    ui/          # shadcn-generated components (owned, not a package)
+    ui/                              # shadcn components (owned — edit freely)
+    catalog/                         # domain cards: ProductCard, ServiceCard
+    dashboard/                       # shell: TopHeader, BottomNav, SidebarNav, MobileDrawer
   lib/
-    utils.ts     # cn() helper (clsx + tailwind-merge)
+    utils.ts                         # cn() helper (clsx + tailwind-merge)
 ```
 
 Import alias `@/*` resolves to `src/*`.
 
+## Where to put new code
+
+- New shadcn primitives → `src/components/ui/` via `npx shadcn@latest add <name>`
+- New design tokens → `src/app/globals.css` `:root` block, then document in `DESIGN.md`
+
 ## Key conventions
 
-- All components are Server Components by default; add `"use client"` only when browser APIs or interactivity require it.
-- CSS variables for design tokens are defined in `globals.css` under `@theme`; do not hardcode colours.
+- CSS variables for design tokens are defined in `globals.css` under `:root`; do not hardcode colours.
 - `cn()` from `@/lib/utils` is the standard way to merge Tailwind classes.
 - Tailwind CSS v4 uses `@utility`, `@variant`, `@theme` in CSS instead of `theme.extend` in JS config.
+- Icons: `lucide-react` only.
