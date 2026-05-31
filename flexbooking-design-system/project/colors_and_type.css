@@ -1,0 +1,163 @@
+/* ============================================================
+   FlexBooking — Colors & Type  ·  WARM STUDIO
+   The brand's foundational design tokens. Warm, human, editorial:
+   cream surfaces, a clay/terracotta primary, sage for "Active" status,
+   sand for quiet fills. Type pairs the characterful Bricolage Grotesque
+   (display) with Hanken Grotesk (text). Colors are oklch.
+   ============================================================ */
+
+/* ---- Fonts ---------------------------------------------------
+   Self-hosted brand fonts (variable TTFs). The @import below pulls
+   in the @font-face rules; no external CDN needed.
+   ------------------------------------------------------------- */
+@import url("fonts/brand-fonts.css");
+
+:root {
+  /* ---- Surfaces & text ----
+     A warm cream canvas (yellow-leaning hue ~78) over warm-white cards,
+     with a soft warm-brown ink for text. Nothing is pure gray. */
+  --background: oklch(0.969 0.014 78);   /* app canvas — warm cream          */
+  --background-2: oklch(0.955 0.016 76); /* sunk wells, closed sheet bg       */
+  --card: oklch(0.996 0.005 80);         /* card surface — warm white         */
+  --card-foreground: oklch(0.27 0.03 56);
+  --popover: oklch(0.996 0.005 80);
+  --popover-foreground: oklch(0.27 0.03 56);
+  --foreground: oklch(0.27 0.03 56);     /* primary text — warm near-black    */
+  --foreground-soft: oklch(0.4 0.03 56); /* secondary headings / strong body  */
+
+  /* ---- Brand / primary (CLAY / terracotta) ----
+     Warm, confident, human. Primary buttons, FAB, logo chip, focus,
+     active accents. */
+  --primary: oklch(0.62 0.15 41);           /* clay — solid fills            */
+  --primary-foreground: oklch(0.99 0.01 80);
+  --primary-deep: oklch(0.54 0.155 41);     /* hover / pressed               */
+  --primary-soft: oklch(0.93 0.045 56);     /* soft clay — thumbnails, icons  */
+  --primary-tint: oklch(0.955 0.025 60);    /* faint wash — hover rows        */
+
+  /* ---- Quiet fills (warm sand) ---- */
+  --secondary: oklch(0.935 0.02 74);
+  --secondary-foreground: oklch(0.27 0.03 56);
+  --muted: oklch(0.935 0.02 74);            /* = sand                         */
+  --muted-foreground: oklch(0.52 0.03 56);  /* helper / descriptions          */
+  --accent: oklch(0.955 0.025 60);          /* = primary-tint                 */
+  --accent-foreground: oklch(0.54 0.155 41);
+  --sand: oklch(0.935 0.02 74);
+
+  /* ---- Semantic ---- */
+  --destructive: oklch(0.55 0.18 30);       /* warm red — dangerous actions   */
+
+  /* ---- Status accent: SAGE (the "Active" pill) ---- */
+  --status-active-bg: oklch(0.93 0.04 150);
+  --status-active-fg: oklch(0.52 0.08 155);
+  --status-inactive-bg: oklch(0.935 0.02 74);   /* sand                       */
+  --status-inactive-fg: oklch(0.52 0.03 56);
+
+  /* ---- Lines & focus ---- */
+  --border: oklch(0.88 0.022 70);        /* card borders, dividers            */
+  --border-soft: oklch(0.92 0.016 72);   /* faint inner rows                  */
+  --input: oklch(0.88 0.022 70);
+  --ring: oklch(0.62 0.15 41);           /* focus ring — clay                 */
+
+  /* ============================================================
+     RADII — soft and generous. Cards are notably rounded (22px),
+     controls are full pills, inputs sit at 14px.
+     ============================================================ */
+  --radius: 14px;                        /* base — inputs / small tiles       */
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 15px;                     /* icon thumbnails                   */
+  --radius-xl: 18px;
+  --radius-card: 22px;                   /* the catalog card                  */
+  --radius-sheet: 26px;                  /* bottom sheets / modals            */
+  --radius-pill: 999px;                  /* buttons, chips, badges, avatars   */
+
+  /* ============================================================
+     ELEVATION — soft, warm, diffuse. Cards use a 1px warm border +
+     a faint inset highlight + a low diffuse shadow (not a hard drop).
+     ============================================================ */
+  --shadow-card: 0 1px 0 oklch(1 0 0 / 0.7) inset,
+                 0 12px 28px -22px oklch(0.27 0.03 56 / 0.55);
+  --shadow-pop: 0 24px 60px -24px oklch(0.27 0.03 56 / 0.45);   /* sheets      */
+  --shadow-cta: 0 8px 18px -8px oklch(0.62 0.15 41 / 0.55);     /* clay buttons */
+
+  /* ============================================================
+     SPACING — 4px base unit.
+     ============================================================ */
+  --space-1: 0.25rem;  --space-2: 0.5rem;  --space-3: 0.75rem;
+  --space-4: 1rem;     --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem;     /* desktop gutter */
+
+  /* ============================================================
+     TYPE — Bricolage Grotesque (display) + Hanken Grotesk (text).
+     ============================================================ */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-body); /* alias */
+
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px — base body */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px — card titles */
+  --text-xl: 1.375rem;   /* 22px — sheet titles */
+  --text-2xl: 1.75rem;   /* 28px */
+  --text-3xl: 2.5rem;    /* 40px — hero H1 */
+
+  --tracking-tight: -0.03em;  /* display headings */
+  --tracking-widest: 0.13em;  /* eyebrows */
+}
+
+/* ============================================================
+   SEMANTIC TYPE ROLES — apply directly.
+   ============================================================ */
+.fb-display { font-family: var(--font-display); }
+
+.fb-h1 {            /* hero / page title */
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.02;
+  color: var(--foreground);
+}
+.fb-h2 {            /* section heading */
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+.fb-card-title {    /* title inside a card */
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--card-foreground);
+}
+.fb-body {          /* default UI body */
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--foreground);
+}
+.fb-muted {         /* helper / descriptions */
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+.fb-eyebrow {       /* kicker above titles */
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--primary);
+}
+.fb-num {           /* prices, counts — display, tabular */
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
