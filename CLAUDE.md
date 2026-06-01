@@ -36,13 +36,19 @@ src/
     dashboard/
       layout.tsx                     # shell: TopHeader + main + BottomNav
       catalog/
-        products/page.tsx
-        services/page.tsx
+        products/
+          page.tsx
+          [id]/page.tsx              # product detail
+        services/
+          page.tsx
+          [id]/page.tsx              # service detail
   components/
     ui/                              # shadcn components (owned — edit freely)
     catalog/                         # domain cards: ProductCard, ServiceCard
     dashboard/                       # shell: TopHeader, BottomNav, SidebarNav, MobileDrawer
   lib/
+    api/
+      catalog.ts                     # apiFetch<T> + typed helpers (getProducts, getServices, …)
     utils.ts                         # cn() helper (clsx + tailwind-merge)
 docs/design/                         # extended design system: tokens, UI kits, preview specimens
 ```
@@ -53,6 +59,31 @@ Import alias `@/*` resolves to `src/*`.
 
 - New shadcn primitives → `src/components/ui/` via `npx shadcn@latest add <name>`
 - New design tokens → `src/app/globals.css` `:root` block, then document in `DESIGN.md`
+- New API helpers → `src/lib/api/catalog.ts` using the existing `apiFetch<T>` wrapper
+
+## Data fetching
+
+All pages are async Server Components — fetch data directly in the component, no `useEffect` or SWR.
+
+Dynamic route params are `Promise<{ id: string }>` in Next.js 16 — always `await params` before accessing:
+
+```ts
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const item = await getProductById(id)
+  ...
+}
+```
+
+Use `"use client"` only when the component needs `usePathname`, `useState`, or browser APIs (shell nav, search toggles, accordion state).
+
+## API layer
+
+`src/lib/api/catalog.ts` provides typed helpers (`getProducts`, `getServices`, `getProductById`, `getServiceById`) built on a generic `apiFetch<T>` wrapper.
+
+- Base URL: `CATALOG_API_URL` env var (default: `http://localhost:8080/api`)
+- Responses use `cache: 'no-store'`
+- All API response shapes are typed in the same file
 
 ## Key conventions
 
@@ -60,3 +91,4 @@ Import alias `@/*` resolves to `src/*`.
 - `cn()` from `@/lib/utils` is the standard way to merge Tailwind classes.
 - Tailwind CSS v4 uses `@utility`, `@variant`, `@theme` in CSS instead of `theme.extend` in JS config.
 - Icons: `lucide-react` only.
+- No test framework is configured — there are no `__tests__/` directories or test files.
