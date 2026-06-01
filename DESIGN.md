@@ -1,7 +1,11 @@
 # Design System — FlexBooking UI
 
+> **Loaded on demand for UI work** (not always-on). This is the engineer's cheat-sheet — tokens,
+> type, components, and code patterns. For brand philosophy, visual foundations, and content depth,
+> see `docs/design/README.md` (the `flexbooking-design` skill's home doc).
+
 **Theme:** Warm Studio — clay/terracotta brand, cream canvas, sage/sand accents.
-All tokens live in `src/app/globals.css` under `:root`. Never hardcode colors.
+All tokens live in `src/app/globals.css` under `:root` (canonical). Never hardcode colors.
 
 ---
 
@@ -19,7 +23,8 @@ All tokens live in `src/app/globals.css` under `:root`. Never hardcode colors.
 
 ## Design Sources
 
-The extended design reference lives in `docs/design/`. Consult it before writing any new page or component.
+The extended design reference lives in `docs/design/` (full directory in `docs/kb/INDEX.md`).
+Consult the matching kit/specimen before writing any new page or component.
 
 ### UI kits — consult before coding a page
 
@@ -27,6 +32,7 @@ The extended design reference lives in `docs/design/`. Consult it before writing
 |-----|------|---------------|------------------|
 | Catalog Dashboard | `docs/design/ui_kits/catalog-dashboard/` | Products listing, Services listing | Responsive shell (top/bottom nav), search + status filter bar, card grid, add/edit sheets, mobile FAB, bottom sheet → modal → side-panel breakpoints |
 | Product Detail | `docs/design/ui_kits/product-detail/` | Product detail page | Product header, 4-up rollup stats row, service accordion with characteristics, workbench rail layout (stacked / side-by-side modes) |
+| Service Detail | `docs/design/ui_kits/service-detail/` | Service detail page | Service header, base-price display, characteristics layout |
 
 Each kit is a self-contained `index.html` — open it in a browser to interact with the layout at every breakpoint.
 

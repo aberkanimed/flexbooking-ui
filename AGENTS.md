@@ -1,17 +1,11 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Engineering gotchas
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+> Loaded on demand (not always-on). Read this before touching shadcn primitives, the Tailwind
+> theme, colors, or fonts. Routing, design, and API docs live via the Knowledge Map in `CLAUDE.md`.
 
-## Design Reference
-
-Before writing any UI code for a page, check `docs/design/ui_kits/` for the high-fidelity interactive kit that covers it:
-
-- `docs/design/ui_kits/catalog-dashboard/` — Catalog Dashboard: Products/Services listing, search and status filters, add/edit sheets, mobile bottom nav, responsive layout. Entry point: `index.html`.
-- `docs/design/ui_kits/product-detail/` — Product Detail page: product header, 4-up rollup stats, service accordion with characteristics, workbench rail layout. Entry point: `index.html`.
-
-Individual components are documented as HTML specimens in `docs/design/preview/` (cards, badges, buttons, nav states, empty states, rollup stats, accordion, char-cards). Open the relevant `.html` file before implementing.
+**Next.js 16 — not the version you know.** Breaking changes to APIs, conventions, and file
+structure. When unsure, verify against the current source — the **`nextjs`** skill, the **context7**
+MCP, or `node_modules/next/dist/docs/` — rather than training data. Heed deprecation notices.
 
 ## Project-specific gotchas
 
