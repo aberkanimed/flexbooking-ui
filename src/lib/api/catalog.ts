@@ -71,3 +71,7 @@ export async function getServices(): Promise<ServiceResponse[]> {
 export async function getProductById(id: string): Promise<ProductDetailResponse> {
   return apiFetch<ProductDetailResponse>(`/v1/catalog/products/${id}`)
 }
+
+export async function getServiceById(id: string): Promise<ServiceDetailResponse> {
+  return apiFetch<ServiceDetailResponse>(`/v1/catalog/services/${id}`)
+}

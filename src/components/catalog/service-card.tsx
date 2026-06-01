@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Wrench, ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ServiceResponse } from "@/lib/api/catalog"
@@ -22,7 +23,7 @@ function StatusPill({ active }: { active: boolean }) {
 
 export function ServiceCard({ service }: { service: ServiceResponse }) {
   return (
-    <div className="group flex flex-col gap-3.5 overflow-hidden rounded-3xl border border-border bg-card p-[18px] shadow-[var(--shadow-card)] transition-[transform,box-shadow,border-color] duration-[160ms] hover:-translate-y-0.5 hover:shadow-[var(--shadow-pop)] hover:border-primary-soft">
+    <Link href={`/dashboard/catalog/services/${service.id}`} className="group flex flex-col gap-3.5 overflow-hidden rounded-3xl border border-border bg-card p-[18px] shadow-[var(--shadow-card)] transition-[transform,box-shadow,border-color] duration-[160ms] hover:-translate-y-0.5 hover:shadow-[var(--shadow-pop)] hover:border-primary-soft">
       {/* Icon thumbnail + status pill */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex size-[50px] shrink-0 items-center justify-center rounded-[15px] bg-primary-soft text-primary">
@@ -53,6 +54,6 @@ export function ServiceCard({ service }: { service: ServiceResponse }) {
         </div>
         <ArrowUpRight className="size-[18px] text-muted-foreground" />
       </div>
-    </div>
+    </Link>
   )
 }
