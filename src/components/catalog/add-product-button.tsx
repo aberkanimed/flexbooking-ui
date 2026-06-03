@@ -12,7 +12,7 @@ export function AddProductButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="hidden sm:inline-flex items-center gap-2 h-[46px] shrink-0 rounded-full px-5 bg-primary text-primary-foreground font-semibold text-[15px] shadow-[var(--shadow-cta)] hover:bg-primary-deep transition-colors duration-150 whitespace-nowrap"
+        className="inline-flex items-center gap-2 h-[46px] shrink-0 rounded-full px-5 bg-primary text-primary-foreground font-semibold text-[15px] shadow-[var(--shadow-cta)] hover:bg-primary-deep transition-colors duration-150 whitespace-nowrap"
       >
         <Plus className="size-[18px]" />
         Add a product
