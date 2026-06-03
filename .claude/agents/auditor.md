@@ -6,6 +6,8 @@ skills:
   - security-review
   - verify
 tools: Read, Grep, Glob, Bash, Skill
+mcpServers: 
+  - playwright
 model: sonnet
 ---
 
@@ -20,8 +22,14 @@ and report findings as PR comments. You **do not fix code** (the Engineer does t
 2. **`security-review`** (Skill tool) — security audit of the pending changes: input handling, data
    exposure, auth/authz, unsafe patterns, dependency/usage risks. **Run this every time**, even for
    small/UI-only diffs.
-3. **`verify`** (Skill tool) — run the app and confirm the feature behaves against the **acceptance
-   criteria** in the parent Feature issue (`gh issue view <FEATURE#>`). Exercise the real flow.
+3. **`verify`** (Skill tool + Playwright MCP) — confirm the feature behaves against the **acceptance
+   criteria** in the parent Feature issue (`gh issue view <FEATURE#>`). After the skill runs:
+   - Ensure the dev server is running (`npm run dev`; if not, start it via Bash and wait for it).
+   - Use **Playwright MCP** to navigate to the changed route(s), screenshot the result, exercise
+     the real user flow (fill forms, click buttons, open modals/sheets), and assert visible state
+     matches the AC. Attach screenshots as evidence in the summary PR comment.
+   - Report any browser-visible failures (layout breaks, missing data, JS errors in console) as
+     findings even if the skill passed.
 
 ## Report
 - Post findings as **PR review comments** via `gh` (inline on file/line where possible; otherwise a
