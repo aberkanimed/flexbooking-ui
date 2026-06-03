@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect } from "react"
+import { useActionState, useEffect, useMemo } from "react"
 import type { ProductResponse } from "@/lib/api/catalog"
 import { saveProductAction, type ActionState } from "@/app/dashboard/catalog/products/actions"
 import {
@@ -28,7 +28,7 @@ interface ProductFormSheetProps {
 export function ProductFormSheet({ open, onOpenChange, product }: ProductFormSheetProps) {
   const isEdit = Boolean(product)
 
-  const boundAction = saveProductAction.bind(null, product?.id)
+  const boundAction = useMemo(() => saveProductAction.bind(null, product?.id), [product?.id])
   const [state, formAction, isPending] = useActionState(boundAction, initialState)
 
   // Close the sheet on successful save (no errors, not the initial empty state)

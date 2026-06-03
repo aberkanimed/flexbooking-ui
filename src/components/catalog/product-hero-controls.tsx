@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState } from "react"
+import { useState, useActionState, useMemo } from "react"
 import { Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductFormSheet } from "@/components/catalog/product-form-sheet"
@@ -16,7 +16,7 @@ interface ProductHeroControlsProps {
 export function ProductHeroControls({ product }: ProductHeroControlsProps) {
   const [editOpen, setEditOpen] = useState(false)
 
-  const boundDeleteAction = deleteProductAction.bind(null, product.id)
+  const boundDeleteAction = useMemo(() => deleteProductAction.bind(null, product.id), [product.id])
   const [deleteState, deleteFormAction, isDeletePending] = useActionState(
     boundDeleteAction,
     initialState,

@@ -122,7 +122,7 @@ export async function getProducts(): Promise<ProductResponse[]> {
  */
 export async function getAllProducts(): Promise<ProductResponse[]> {
   const data = await apiFetch<{ products: ProductResponse[] }>(
-    '/v1/catalog/products?active=false',
+    '/v1/catalog/products',
   )
   return data.products
 }
