@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Package, Clock, ChevronRight } from "lucide-react"
 import type { ProductDetailResponse } from "@/lib/api/catalog"
+import { ProductHeroControls } from "@/components/catalog/product-hero-controls"
 
 function StatusPill({ active }: { active: boolean }) {
   return (
@@ -58,6 +59,11 @@ export function ProductDetailHero({ product }: { product: ProductDetailResponse 
               </span>
             </div>
           )}
+
+          {/* Edit / delete controls — client leaf, hero stays a Server Component */}
+          <div className="mt-5">
+            <ProductHeroControls product={product} />
+          </div>
         </div>
       </header>
     </div>

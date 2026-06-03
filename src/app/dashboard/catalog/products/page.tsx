@@ -1,9 +1,10 @@
-import { getProducts } from "@/lib/api/catalog"
+import { getAllProducts } from "@/lib/api/catalog"
 import { ProductCard } from "@/components/catalog/product-card"
-import { Package, Plus } from "lucide-react"
+import { AddProductButton } from "@/components/catalog/add-product-button"
+import { Package } from "lucide-react"
 
 export default async function ProductsPage() {
-  const products = await getProducts()
+  const products = await getAllProducts()
   const count = products.length
 
   return (
@@ -24,10 +25,7 @@ export default async function ProductsPage() {
               : `${count} ${count === 1 ? "product" : "products"} in your catalog.`}
           </p>
         </div>
-        <button className="hidden sm:inline-flex items-center gap-2 h-[46px] shrink-0 rounded-full px-5 bg-primary text-primary-foreground font-semibold text-[15px] shadow-[var(--shadow-cta)] hover:bg-primary-deep transition-colors duration-150 whitespace-nowrap">
-          <Plus className="size-[18px]" />
-          Add a product
-        </button>
+        <AddProductButton />
       </header>
 
       {/* Grid or empty state */}
