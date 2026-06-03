@@ -111,11 +111,6 @@ async function apiMutate<T>(
 // Read helpers
 // ---------------------------------------------------------------------------
 
-export async function getProducts(): Promise<ProductResponse[]> {
-  const data = await apiFetch<{ products: ProductResponse[] }>('/v1/catalog/products')
-  return data.products
-}
-
 /**
  * Returns both active and inactive products.
  * Used by the listing page so operators can see and manage inactive products.
