@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useState } from "react"
 import { Plus, Trash2, Check } from "lucide-react"
 import type { CharacteristicResponse, CharacteristicSpecificationDetailResponse } from "@/lib/api/catalog"
-import { addSpecAction, initialSpecState } from "@/app/dashboard/catalog/services/actions"
+import { addSpecAction, type SpecActionState } from "@/app/dashboard/catalog/services/actions"
 import {
   Sheet,
   SheetContent,
@@ -23,6 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+
+// Defined locally (not exported from the `"use server"` actions module — only async
+// function exports survive that boundary; a plain const would resolve to `undefined`
+// on the client and crash `useActionState`'s SSR initial-state resolution).
+const initialSpecState: SpecActionState = { errors: [] }
 
 interface SpecFormSheetProps {
   open: boolean
@@ -47,6 +52,20 @@ export function SpecFormSheet({
 
   const boundAction = useMemo(() => addSpecAction.bind(null, serviceId), [serviceId])
   const [state, formAction, isPending] = useActionState(boundAction, initialSpecState)
+
+  // Reset local form state each time the sheet is opened (instead of remounting via
+  // `key`, which breaks `useActionState`'s SSR initial-state resolution).
+  useEffect(() => {
+    if (open) {
+      queueMicrotask(() => {
+        setConfigurable(true)
+        setActive(true)
+        setMode("values")
+        setValues(["", ""])
+        setDefaultIndex(0)
+      })
+    }
+  }, [open])
 
   // Close the sheet on successful attach (no errors, not the initial empty state)
   useEffect(() => {

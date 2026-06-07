@@ -62,7 +62,6 @@ export function ServiceSpecsManager({ serviceId, specs, characteristics }: Servi
       </div>
 
       <SpecFormSheet
-        key={open ? serviceId : "closed"}
         open={open}
         onOpenChange={setOpen}
         serviceId={serviceId}

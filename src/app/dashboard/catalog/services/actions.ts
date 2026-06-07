@@ -100,8 +100,6 @@ export interface SpecActionState {
   }
 }
 
-export const initialSpecState: SpecActionState = { errors: [] }
-
 /** Attach a characteristic specification to a service. */
 export async function addSpecAction(
   serviceId: string,
