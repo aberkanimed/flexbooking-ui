@@ -153,3 +153,32 @@ export async function updateProduct(id: string, body: ProductRequest): Promise<P
 export async function deleteProduct(id: string): Promise<void> {
   return apiMutate<void>(`/v1/catalog/products/${id}`, 'DELETE')
 }
+
+/** Request body for create and update characteristic mutations. All four fields required per OpenAPI. */
+export interface CharacteristicRequest {
+  name: string
+  description: string
+  valueType: 'STRING' | 'NUMBER' | 'BOOLEAN'
+  active: boolean
+}
+
+/** GET /v1/catalog/characteristics — returns all characteristics (active and inactive). Unwraps `items` envelope. */
+export async function getAllCharacteristics(): Promise<CharacteristicResponse[]> {
+  const data = await apiFetch<{ items: CharacteristicResponse[] }>('/v1/catalog/characteristics')
+  return data.items
+}
+
+/** POST /v1/catalog/characteristics — creates a new characteristic, returns 201 CharacteristicResponse. */
+export async function createCharacteristic(body: CharacteristicRequest): Promise<CharacteristicResponse> {
+  return apiMutate<CharacteristicResponse>('/v1/catalog/characteristics', 'POST', body)
+}
+
+/** PUT /v1/catalog/characteristics/{id} — updates an existing characteristic, returns 200 CharacteristicResponse. */
+export async function updateCharacteristic(id: string, body: CharacteristicRequest): Promise<CharacteristicResponse> {
+  return apiMutate<CharacteristicResponse>(`/v1/catalog/characteristics/${id}`, 'PUT', body)
+}
+
+/** DELETE /v1/catalog/characteristics/{id} — server-side deactivates (soft delete), expects 204 No Content. */
+export async function deleteCharacteristic(id: string): Promise<void> {
+  return apiMutate<void>(`/v1/catalog/characteristics/${id}`, 'DELETE')
+}
