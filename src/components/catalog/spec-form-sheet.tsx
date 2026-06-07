@@ -48,19 +48,6 @@ export function SpecFormSheet({
   const boundAction = useMemo(() => addSpecAction.bind(null, serviceId), [serviceId])
   const [state, formAction, isPending] = useActionState(boundAction, initialSpecState)
 
-  // Reset local form state whenever the sheet opens fresh
-  const [openFor, setOpenFor] = useState(open)
-  if (openFor !== open) {
-    setOpenFor(open)
-    if (open) {
-      setConfigurable(true)
-      setActive(true)
-      setMode("values")
-      setValues(["", ""])
-      setDefaultIndex(0)
-    }
-  }
-
   // Close the sheet on successful attach (no errors, not the initial empty state)
   useEffect(() => {
     if (

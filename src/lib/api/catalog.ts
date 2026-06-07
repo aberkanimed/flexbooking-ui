@@ -246,6 +246,10 @@ export async function addServiceCharacteristics(
 
 /** DELETE /v1/catalog/services/{id}/characteristics — removes characteristic specs from a service, expects 204 No Content. */
 export async function removeServiceCharacteristics(serviceId: string, ids: string[]): Promise<void> {
+  // `ids` are CharacteristicSpecificationDetailResponse.id values (the spec's own id, not
+  // characteristic.id) — the operation is named "removeCharacteristicsSpecs" / "Remove
+  // characteristic specifications from a service" and the spec response exposes a distinct
+  // id precisely so spec-level operations (like this one) can address it.
   return apiMutate<void>(`/v1/catalog/services/${serviceId}/characteristics`, 'DELETE', {
     characteristics: ids,
   })

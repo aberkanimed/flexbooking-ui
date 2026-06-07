@@ -75,7 +75,12 @@ export function ServiceHeroControls({ service }: ServiceHeroControlsProps) {
       )}
 
       {/* Edit sheet */}
-      <ServiceFormSheet open={editOpen} onOpenChange={setEditOpen} service={service} />
+      <ServiceFormSheet
+        key={service?.id ?? "create"}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        service={service}
+      />
 
       {/* Delete confirmation */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>

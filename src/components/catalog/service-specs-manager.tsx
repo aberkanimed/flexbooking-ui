@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Plus, SlidersHorizontal } from "lucide-react"
 import type { CharacteristicResponse, CharacteristicSpecificationDetailResponse } from "@/lib/api/catalog"
 import { Button } from "@/components/ui/button"
@@ -16,10 +16,12 @@ interface ServiceSpecsManagerProps {
 export function ServiceSpecsManager({ serviceId, specs, characteristics }: ServiceSpecsManagerProps) {
   const [open, setOpen] = useState(false)
 
-  const attachedIds = new Set(specs.map((s) => s.characteristic.id))
-  const availableCharacteristics = characteristics.filter(
-    (c) => c.active && !attachedIds.has(c.id),
-  )
+  // Derived from `specs`/`characteristics` props — memoized to avoid recomputing the
+  // filtered list (and reallocating the Set) on every render.
+  const availableCharacteristics = useMemo(() => {
+    const attachedIds = new Set(specs.map((s) => s.characteristic.id))
+    return characteristics.filter((c) => c.active && !attachedIds.has(c.id))
+  }, [specs, characteristics])
 
   return (
     <div className="mt-8">
@@ -60,6 +62,7 @@ export function ServiceSpecsManager({ serviceId, specs, characteristics }: Servi
       </div>
 
       <SpecFormSheet
+        key={open ? serviceId : "closed"}
         open={open}
         onOpenChange={setOpen}
         serviceId={serviceId}

@@ -173,6 +173,8 @@ export async function addSpecAction(
         isDefault: index === defaultIndex,
       }))
       if (!characteristicValues.some((v) => v.isDefault)) {
+        // Guard against malformed/tampered submissions where no option was marked default
+        // (the form always sets one); ensures the request always has exactly one default.
         characteristicValues[0].isDefault = true
       }
     }

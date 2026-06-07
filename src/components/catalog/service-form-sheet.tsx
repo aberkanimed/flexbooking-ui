@@ -41,11 +41,6 @@ export function ServiceFormSheet({ open, onOpenChange, service, products = [] }:
   // so Switch never flips from uncontrolled to controlled.
   const defaultActive = service ? service.active : true
   const [active, setActive] = useState(defaultActive)
-  const [activeFor, setActiveFor] = useState(service?.id)
-  if (activeFor !== service?.id) {
-    setActiveFor(service?.id)
-    setActive(defaultActive)
-  }
 
   const boundAction = useMemo(() => saveServiceAction.bind(null, service?.id), [service?.id])
   const [state, formAction, isPending] = useActionState(boundAction, initialState)

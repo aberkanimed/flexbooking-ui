@@ -46,7 +46,7 @@ export function AddServiceButton({ products }: AddServiceButtonProps) {
         <Plus className="size-6" />
       </button>
 
-      <ServiceFormSheet open={open} onOpenChange={setOpen} products={products} />
+      <ServiceFormSheet key={open ? "create" : "closed"} open={open} onOpenChange={setOpen} products={products} />
     </>
   )
 }
