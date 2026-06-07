@@ -1,25 +1,9 @@
 import Link from "next/link"
 import { Wrench, ArrowUpRight } from "lucide-react"
-import { cn } from "@/lib/utils"
 import type { ServiceResponse } from "@/lib/api/catalog"
+import { StatusPill } from "@/components/catalog/status-pill"
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
-
-function StatusPill({ active }: { active: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 h-7 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap shrink-0",
-        active
-          ? "bg-[var(--status-active-bg)] text-[var(--status-active-fg)]"
-          : "bg-[var(--status-inactive-bg)] text-[var(--status-inactive-fg)]"
-      )}
-    >
-      <span className="size-[7px] rounded-full bg-current" />
-      {active ? "Active" : "Inactive"}
-    </span>
-  )
-}
 
 export function ServiceCard({ service }: { service: ServiceResponse }) {
   return (

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Package, Wrench } from "lucide-react"
+import { Package, Wrench, Tag } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navGroups = [
@@ -11,6 +11,7 @@ const navGroups = [
     items: [
       { label: "Products", href: "/dashboard/catalog/products", icon: Package },
       { label: "Services", href: "/dashboard/catalog/services", icon: Wrench },
+      { label: "Items", href: "/dashboard/catalog/characteristics", icon: Tag },
     ],
   },
 ]

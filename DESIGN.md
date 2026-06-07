@@ -187,20 +187,26 @@ Base: `--radius: 0.625rem` (10px)
 | Card | `card.tsx` | Compound: `Card` `CardHeader` `CardTitle` `CardDescription` `CardAction` `CardContent` `CardFooter` / sizes: `default` `sm` |
 | Badge | `badge.tsx` | variants: `default` `secondary` `destructive` `outline` `ghost` `link` |
 | Sheet | `sheet.tsx` | Sides: `top` `right` `bottom` `left` / Compound: `Sheet` `SheetTrigger` `SheetContent` `SheetHeader` `SheetFooter` `SheetTitle` `SheetDescription` `SheetClose` |
+| AlertDialog | `alert-dialog.tsx` | Confirmation modal — Compound: `AlertDialog` `AlertDialogTrigger` `AlertDialogContent` `AlertDialogHeader` `AlertDialogFooter` `AlertDialogTitle` `AlertDialogDescription` `AlertDialogAction` `AlertDialogCancel`. Use to gate destructive actions (e.g. delete) behind a Cancel/Confirm step before calling the server action. On mobile, give the footer `flex-col sm:flex-row` and buttons `w-full sm:w-auto` — the default isn't sufficient alone (see `characteristic-card.tsx`) |
+| Select | `select.tsx` | Dropdown select — Compound: `Select` `SelectTrigger` `SelectValue` `SelectContent` `SelectItem` (base-ui, not Radix — check source for prop names). Used for the `valueType` field in `CharacteristicFormSheet` |
 
 ### Domain Components — `src/components/catalog/`
 
 | Component | File | Use for |
 |-----------|------|---------|
+| StatusPill | `status-pill.tsx` | Shared `active`/`inactive` status pill (`sm` size variant, `className`); colors are inline styles per Golden Rule #9 — use this instead of re-implementing the pill markup |
 | ProductCard | `product-card.tsx` | Grid card with icon, status pill, name, description |
 | ServiceCard | `service-card.tsx` | Same structure as ProductCard; footer shows base price |
+| CharacteristicCard | `characteristic-card.tsx` | Items grid card — icon, status pill, name, description, value type; inline edit (opens `CharacteristicFormSheet`) and delete (gated by `AlertDialog`, copy clarifies delete = deactivate, see `docs/kb/api-and-data.md` → soft-delete pattern) |
+| CharacteristicFormSheet | `characteristic-form-sheet.tsx` | Create/edit sheet for a characteristic — name, description, value type (`Select`), active (`Switch`, fully controlled and keyed on entity id to avoid base-ui's "uncontrolled Switch" warning when reused across rows) |
+| AddCharacteristicButton | `add-characteristic-button.tsx` | Opens `CharacteristicFormSheet` in create mode — desktop button / mobile FAB |
 
 ### Shell Components — `src/components/dashboard/`
 
 | Component | File | Use for |
 |-----------|------|---------|
 | TopHeader | `top-header.tsx` | App header — logo, nav tabs, search, notifications, avatar |
-| BottomNav | `bottom-nav.tsx` | Mobile-only tab bar (hidden on sm+) |
+| BottomNav | `bottom-nav.tsx` | Mobile-only tab bar (hidden on sm+); links: Products, Services, Items — only entries with shipped pages. Note: the "Items" label is UI copy for the `/dashboard/catalog/characteristics` route — the underlying entity, route, and component names remain "characteristic(s)" |
 | MobileDrawer | `mobile-drawer.tsx` | Sheet-based nav drawer for mobile |
 | SidebarNav | `sidebar-nav.tsx` | Grouped nav items used inside MobileDrawer |
 
@@ -229,6 +235,8 @@ Hero section
 Card grid
   grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3
   gap-3.5 sm:gap-4 lg:gap-[18px]
+  pb-24 sm:pb-0   ← required when the page has a mobile FAB (e.g. AddCharacteristicButton),
+                     so the fixed button doesn't obscure the last row
 
 Empty state (when no items)
   Centered container, rounded-3xl dashed border
@@ -265,12 +273,13 @@ Empty state (when no items)
 
 ### Status Pill
 
+Use the shared `StatusPill` component (`src/components/catalog/status-pill.tsx`) — don't
+re-implement this markup. It renders `active`/`inactive` with an optional `sm` size and accepts
+`className`; status colors stay inline-style per Golden Rule #9 (`var(--status-*-bg/fg)`).
+
 ```tsx
-<span className="h-7 rounded-full px-3 inline-flex items-center gap-1.5 text-[13px] font-semibold"
-  style={{ background: 'var(--status-active-bg)', color: 'var(--status-active-fg)' }}>
-  <span className="size-[7px] rounded-full bg-current" />
-  Active
-</span>
+<StatusPill active={item.active} />
+<StatusPill active={item.active} sm />
 ```
 
 ### CTA Button

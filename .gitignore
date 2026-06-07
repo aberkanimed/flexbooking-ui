@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 /docs
+.tmp
 
 # debug
 npm-debug.log*
@@ -43,3 +44,11 @@ next-env.d.ts
 .claude/settings.local.json
 db-schema-catalog.sql
 catalog-api-docs.json
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

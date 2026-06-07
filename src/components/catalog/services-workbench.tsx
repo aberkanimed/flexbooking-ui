@@ -5,28 +5,10 @@ import { Layers, ChevronDown, ListTree } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ServiceDetailResponse } from "@/lib/api/catalog"
 import { CharCards } from "./char-cards"
+import { StatusPill } from "@/components/catalog/status-pill"
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 })
 const money = (cents: number) => usd.format(cents / 100)
-
-function StatusPill({ active, sm }: { active: boolean; sm?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full font-semibold whitespace-nowrap shrink-0",
-        sm ? "h-6 px-2.5 text-[12px]" : "h-7 px-3 text-[13px]"
-      )}
-      style={
-        active
-          ? { background: "var(--status-active-bg)", color: "var(--status-active-fg)" }
-          : { background: "var(--status-inactive-bg)", color: "var(--status-inactive-fg)" }
-      }
-    >
-      <span className="size-[7px] rounded-full bg-current" />
-      {active ? "Active" : "Inactive"}
-    </span>
-  )
-}
 
 function ServiceItem({
   svc,
