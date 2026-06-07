@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Layers, ChevronRight } from "lucide-react"
 import type { ServiceDetailResponse } from "@/lib/api/catalog"
 import { StatusPill } from "@/components/catalog/status-pill"
+import { ServiceHeroControls } from "@/components/catalog/service-hero-controls"
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 })
 const money = (cents: number) => usd.format(cents / 100)
@@ -57,6 +58,9 @@ export function ServiceDetailHero({ service }: { service: ServiceDetailResponse 
           {money(service.basePrice)}
         </p>
       </div>
+
+      {/* Edit / delete controls */}
+      <ServiceHeroControls service={service} />
     </div>
   )
 }

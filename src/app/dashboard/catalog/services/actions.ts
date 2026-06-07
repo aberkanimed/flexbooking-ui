@@ -1,9 +1,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 import {
   createService,
   updateService,
+  deleteService,
   type ServiceRequest,
   type ServiceUpdateRequest,
 } from "@/lib/api/catalog"
@@ -81,4 +83,21 @@ export async function saveServiceAction(
       (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
     return { errors }
   }
+}
+
+/** Delete a service by id. Redirects to the services listing on success. */
+export async function deleteServiceAction(
+  id: string,
+  _prev: ActionState,
+  _formData: FormData,
+): Promise<ActionState> {
+  try {
+    await deleteService(id)
+    revalidatePath("/dashboard/catalog/services")
+  } catch (err) {
+    const errors =
+      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+    return { errors }
+  }
+  redirect("/dashboard/catalog/services")
 }
