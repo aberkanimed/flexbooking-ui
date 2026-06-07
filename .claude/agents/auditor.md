@@ -8,7 +8,7 @@ skills:
   - powershell-shell
   - gh-cli
   - file-ops
-tools: Read, Write, Edit, Grep, Glob, Bash, Skill, mcp__playwright
+tools: Read, Write, Edit, Grep, Glob, PowerShell, Skill, mcp__playwright
 disallowedTools: SendMessage, Agent, Task
 mcpServers: 
   - playwright
