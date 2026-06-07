@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 const NAV = [
   { label: "Products", href: "/dashboard/catalog/products" },
   { label: "Services", href: "/dashboard/catalog/services" },
-  { label: "Characteristics", href: "/dashboard/catalog/characteristics" },
+  { label: "Items", href: "/dashboard/catalog/characteristics" },
   { label: "Bookings", href: "/dashboard/bookings", disabled: true },
   { label: "Customers", href: "/dashboard/customers", disabled: true },
 ]
@@ -37,14 +37,14 @@ export function TopHeader() {
 
   return (
     <header className="z-40 flex shrink-0 flex-col border-b border-border/60 bg-background/92 backdrop-blur-sm">
-      {/* ── Main bar ── */}
+      {/* â”€â”€ Main bar â”€â”€ */}
       <div className="flex h-[60px] items-center gap-3 px-4 lg:h-[68px] lg:gap-5 lg:px-8">
         {/* Logo + wordmark */}
         <div className="flex shrink-0 items-center gap-2.5">
           <FlexBookingLogo />
           {/*
             - Mobile (<sm):  wordmark visible (no nav in topbar, it's at the bottom)
-            - Tablet (sm–lg): wordmark hidden (nav tabs need the space)
+            - Tablet (smâ€“lg): wordmark hidden (nav tabs need the space)
             - Laptop (lg+):  wordmark visible again alongside full nav
           */}
           <span className="inline font-heading text-[19px] font-bold tracking-[-0.02em] sm:hidden lg:inline">
@@ -52,7 +52,7 @@ export function TopHeader() {
           </span>
         </div>
 
-        {/* Top nav tabs — hidden on mobile (bottom nav), shown sm+ */}
+        {/* Top nav tabs â€” hidden on mobile (bottom nav), shown sm+ */}
         {!searchOpen && (
           <nav className="hidden sm:flex items-center gap-0.5 ml-1.5" aria-label="Main">
             {NAV.map((n) => (
@@ -76,14 +76,14 @@ export function TopHeader() {
 
         {/* Right actions */}
         <div className="ml-auto flex items-center gap-2">
-          {/* Inline search field — tablet/laptop only, when search is open */}
+          {/* Inline search field â€” tablet/laptop only, when search is open */}
           {isCatalog && searchOpen && (
             <label className="hidden sm:flex items-center gap-2.5 h-[42px] w-[230px] lg:w-[280px] cursor-text rounded-full border border-border bg-card px-4">
               <Search className="size-[17px] shrink-0 text-muted-foreground" />
               <input
                 autoFocus
                 className="min-w-0 flex-1 border-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Search catalog…"
+                placeholder="Search catalogâ€¦"
               />
             </label>
           )}
@@ -120,7 +120,7 @@ export function TopHeader() {
         </div>
       </div>
 
-      {/* ── Mobile search row — drops below topbar, mobile only ── */}
+      {/* â”€â”€ Mobile search row â€” drops below topbar, mobile only â”€â”€ */}
       {isCatalog && searchOpen && (
         <div className="px-4 pb-3 sm:hidden">
           <label className="flex cursor-text items-center gap-2.5 rounded-full border border-border bg-card px-4 h-11">
@@ -128,7 +128,7 @@ export function TopHeader() {
             <input
               autoFocus
               className="min-w-0 flex-1 border-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              placeholder="Search your catalog…"
+              placeholder="Search your catalogâ€¦"
             />
             <button
               onClick={closeSearch}
