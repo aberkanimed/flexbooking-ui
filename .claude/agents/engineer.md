@@ -7,9 +7,9 @@ mcpServers:
 tools: Read, Write, Edit, Grep, Glob, PowerShell, Skill, mcp__context7, mcp__shadcn
 disallowedTools: WebFetch, WebSearch, SendMessage, Agent, Task
 skills: 
-   - powershell-shell
-   - gh-cli
-   - file-ops
+  - powershell-shell
+  - gh-cli
+  - file-ops
 model: sonnet
 ---
 

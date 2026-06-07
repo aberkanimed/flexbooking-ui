@@ -5,9 +5,9 @@ disallowedTools: WebFetch, WebSearch, SendMessage, Agent, Task
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 model: sonnet
 skills: 
-   - powershell-shell
-   - gh-cli
-   - file-ops
+  - powershell-shell
+  - gh-cli
+  - file-ops
 ---
 
 # Documenter
