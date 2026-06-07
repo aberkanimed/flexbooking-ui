@@ -187,7 +187,8 @@ Base: `--radius: 0.625rem` (10px)
 | Card | `card.tsx` | Compound: `Card` `CardHeader` `CardTitle` `CardDescription` `CardAction` `CardContent` `CardFooter` / sizes: `default` `sm` |
 | Badge | `badge.tsx` | variants: `default` `secondary` `destructive` `outline` `ghost` `link` |
 | Sheet | `sheet.tsx` | Sides: `top` `right` `bottom` `left` / Compound: `Sheet` `SheetTrigger` `SheetContent` `SheetHeader` `SheetFooter` `SheetTitle` `SheetDescription` `SheetClose` |
-| AlertDialog | `alert-dialog.tsx` | Confirmation modal — Compound: `AlertDialog` `AlertDialogTrigger` `AlertDialogContent` `AlertDialogHeader` `AlertDialogFooter` `AlertDialogTitle` `AlertDialogDescription` `AlertDialogAction` `AlertDialogCancel`. Use to gate destructive actions (e.g. delete) behind a Cancel/Confirm step before calling the server action |
+| AlertDialog | `alert-dialog.tsx` | Confirmation modal — Compound: `AlertDialog` `AlertDialogTrigger` `AlertDialogContent` `AlertDialogHeader` `AlertDialogFooter` `AlertDialogTitle` `AlertDialogDescription` `AlertDialogAction` `AlertDialogCancel`. Use to gate destructive actions (e.g. delete) behind a Cancel/Confirm step before calling the server action. On mobile, give the footer `flex-col sm:flex-row` and buttons `w-full sm:w-auto` — the default isn't sufficient alone (see `characteristic-card.tsx`) |
+| Select | `select.tsx` | Dropdown select — Compound: `Select` `SelectTrigger` `SelectValue` `SelectContent` `SelectItem` (base-ui, not Radix — check source for prop names). Used for the `valueType` field in `CharacteristicFormSheet` |
 
 ### Domain Components — `src/components/catalog/`
 
@@ -196,6 +197,9 @@ Base: `--radius: 0.625rem` (10px)
 | StatusPill | `status-pill.tsx` | Shared `active`/`inactive` status pill (`sm` size variant, `className`); colors are inline styles per Golden Rule #9 — use this instead of re-implementing the pill markup |
 | ProductCard | `product-card.tsx` | Grid card with icon, status pill, name, description |
 | ServiceCard | `service-card.tsx` | Same structure as ProductCard; footer shows base price |
+| CharacteristicCard | `characteristic-card.tsx` | Items grid card — icon, status pill, name, description, value type; inline edit (opens `CharacteristicFormSheet`) and delete (gated by `AlertDialog`, copy clarifies delete = deactivate, see `docs/kb/api-and-data.md` → soft-delete pattern) |
+| CharacteristicFormSheet | `characteristic-form-sheet.tsx` | Create/edit sheet for a characteristic — name, description, value type (`Select`), active (`Switch`, fully controlled and keyed on entity id to avoid base-ui's "uncontrolled Switch" warning when reused across rows) |
+| AddCharacteristicButton | `add-characteristic-button.tsx` | Opens `CharacteristicFormSheet` in create mode — desktop button / mobile FAB |
 
 ### Shell Components — `src/components/dashboard/`
 
@@ -231,6 +235,8 @@ Hero section
 Card grid
   grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3
   gap-3.5 sm:gap-4 lg:gap-[18px]
+  pb-24 sm:pb-0   ← required when the page has a mobile FAB (e.g. AddCharacteristicButton),
+                     so the fixed button doesn't obscure the last row
 
 Empty state (when no items)
   Centered container, rounded-3xl dashed border
