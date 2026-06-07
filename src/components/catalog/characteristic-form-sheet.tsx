@@ -126,7 +126,7 @@ export function CharacteristicFormSheet({
             <Label htmlFor="cf-value-type">Value type</Label>
             <Select
               name="valueType"
-              defaultValue={characteristic?.valueType ?? undefined}
+              defaultValue={characteristic?.valueType}
               disabled={isPending}
             >
               <SelectTrigger
