@@ -22,4 +22,7 @@ All design tokens use `oklch()` color space. Never convert to hex or hsl — the
 Fonts are loaded in `src/app/layout.tsx` via `next/font/google` and exposed as `--font-hanken` and `--font-bricolage`. Use the Tailwind classes `font-sans` (body) and `font-heading` (display/titles) — never reference font names directly in CSS or inline styles.
 
 **Status colors via CSS variables**
-`--status-active-bg`, `--status-active-fg`, `--status-inactive-bg`, `--status-inactive-fg` are not mapped to Tailwind utilities. Use inline styles: `style={{ background: 'var(--status-active-bg)', color: 'var(--status-active-fg)' }}`.
+`--status-active-bg`, `--status-active-fg`, `--status-inactive-bg`, `--status-inactive-fg` are not mapped to Tailwind utilities. Use inline styles: `style={{ background: 'var(--status-active-bg)', color: 'var(--status-active-fg)' }}`. Don't hand-roll the pill markup — use the shared `StatusPill` from `src/components/catalog/status-pill.tsx` (it already does this correctly).
+
+**Destructive actions need a confirmation step**
+Gate delete/destroy server-action calls behind the shadcn `AlertDialog` (`src/components/ui/alert-dialog.tsx`, base-ui) — Cancel / destructive Confirm — rather than firing on a single click. See `characteristic-card.tsx` for the established pattern.
