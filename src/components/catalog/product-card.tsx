@@ -1,23 +1,7 @@
 import Link from "next/link"
 import { Package, ArrowUpRight } from "lucide-react"
-import { cn } from "@/lib/utils"
 import type { ProductResponse } from "@/lib/api/catalog"
-
-function StatusPill({ active }: { active: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 h-7 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap shrink-0",
-        active
-          ? "bg-[var(--status-active-bg)] text-[var(--status-active-fg)]"
-          : "bg-[var(--status-inactive-bg)] text-[var(--status-inactive-fg)]"
-      )}
-    >
-      <span className="size-[7px] rounded-full bg-current" />
-      {active ? "Active" : "Inactive"}
-    </span>
-  )
-}
+import { StatusPill } from "@/components/catalog/status-pill"
 
 export function ProductCard({ product }: { product: ProductResponse }) {
   return (

@@ -2,11 +2,21 @@
 
 import { useState, useActionState, useMemo } from "react"
 import { Pencil, Trash2, Tag } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { CharacteristicFormSheet } from "@/components/catalog/characteristic-form-sheet"
 import { deleteCharacteristicAction, type ActionState } from "@/app/dashboard/catalog/characteristics/actions"
 import type { CharacteristicResponse } from "@/lib/api/catalog"
+import { StatusPill } from "@/components/catalog/status-pill"
 
 const initialState: ActionState = { errors: [] }
 
@@ -16,30 +26,13 @@ const VALUE_TYPE_LABELS: Record<CharacteristicResponse["valueType"], string> = {
   BOOLEAN: "Boolean",
 }
 
-function StatusPill({ active }: { active: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 h-7 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap shrink-0",
-      )}
-      style={
-        active
-          ? { background: "var(--status-active-bg)", color: "var(--status-active-fg)" }
-          : { background: "var(--status-inactive-bg)", color: "var(--status-inactive-fg)" }
-      }
-    >
-      <span className="size-[7px] rounded-full bg-current" />
-      {active ? "Active" : "Inactive"}
-    </span>
-  )
-}
-
 interface CharacteristicCardProps {
   characteristic: CharacteristicResponse
 }
 
 export function CharacteristicCard({ characteristic }: CharacteristicCardProps) {
   const [editOpen, setEditOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
 
   const boundDeleteAction = useMemo(
     () => deleteCharacteristicAction.bind(null, characteristic.id),
@@ -98,18 +91,17 @@ export function CharacteristicCard({ characteristic }: CharacteristicCardProps) 
         >
           <Pencil className="size-4" />
         </Button>
-        <form action={deleteFormAction}>
-          <Button
-            type="submit"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Delete ${characteristic.name}`}
-            disabled={isDeletePending}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </form>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`Delete ${characteristic.name}`}
+          disabled={isDeletePending}
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={() => setDeleteConfirmOpen(true)}
+        >
+          <Trash2 className="size-4" />
+        </Button>
       </div>
 
       {/* Edit sheet */}
@@ -118,6 +110,31 @@ export function CharacteristicCard({ characteristic }: CharacteristicCardProps) 
         onOpenChange={setEditOpen}
         characteristic={characteristic}
       />
+
+      {/* Delete confirmation */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete characteristic?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{characteristic.name}&quot;. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isDeletePending}
+              onClick={() => {
+                setDeleteConfirmOpen(false)
+                deleteFormAction(new FormData())
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

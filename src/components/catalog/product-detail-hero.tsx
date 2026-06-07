@@ -2,22 +2,7 @@ import Link from "next/link"
 import { Package, Clock, ChevronRight } from "lucide-react"
 import type { ProductDetailResponse } from "@/lib/api/catalog"
 import { ProductHeroControls } from "@/components/catalog/product-hero-controls"
-
-function StatusPill({ active }: { active: boolean }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 h-7 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap shrink-0"
-      style={
-        active
-          ? { background: "var(--status-active-bg)", color: "var(--status-active-fg)" }
-          : { background: "var(--status-inactive-bg)", color: "var(--status-inactive-fg)" }
-      }
-    >
-      <span className="size-[7px] rounded-full bg-current" />
-      {active ? "Active" : "Inactive"}
-    </span>
-  )
-}
+import { StatusPill } from "@/components/catalog/status-pill"
 
 export function ProductDetailHero({ product }: { product: ProductDetailResponse }) {
   return (
