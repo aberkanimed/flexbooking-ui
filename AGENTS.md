@@ -35,3 +35,14 @@ On listing pages with a mobile floating-action-button (`AddCharacteristicButton`
 
 **Controlled `Switch` when its initial value depends on a changing prop**
 If a `Switch`'s starting value comes from a prop that can change across renders/remounts (e.g. the same edit sheet reused for different rows), use a fully controlled `checked` / `onCheckedChange` with state reset keyed on the entity id — not `defaultChecked`. Otherwise base-ui logs an "uncontrolled Switch changing default checked state" warning. See `characteristic-form-sheet.tsx`.
+
+**`"use server"` modules may only export async functions — not consts/types-as-values**
+A file with `"use server"` at the top is a server-action boundary: **only `async function` exports
+survive** the client/server split. Exporting a plain `const initialState = { errors: [] }` (or any
+non-function value) compiles fine but resolves to `undefined` on the client, so `useActionState`'s
+initial state becomes `undefined` and the component crashes during SSR reading e.g.
+`state.errors.length` (`TypeError: Cannot read properties of undefined`). This caused a
+production-breaking 500 on the service detail page (fixed in `112f53e`, refs #28). **Define
+`initial*State` constants locally in the client component** that calls `useActionState` (mirroring
+`service-form-sheet.tsx` / `spec-form-sheet.tsx`), importing only the **type** (e.g. `type
+SpecActionState`) from the actions module — never the value.
