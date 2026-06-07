@@ -41,7 +41,7 @@ export default async function CharacteristicsPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3 sm:gap-4 lg:gap-[18px]">
+        <div className="grid grid-cols-1 gap-3.5 pb-24 sm:grid-cols-2 sm:gap-4 sm:pb-0 xl:grid-cols-3 lg:gap-[18px]">
           {characteristics.map((characteristic) => (
             <CharacteristicCard key={characteristic.id} characteristic={characteristic} />
           ))}

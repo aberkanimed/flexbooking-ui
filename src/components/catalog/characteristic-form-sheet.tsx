@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useMemo } from "react"
+import { useActionState, useEffect, useMemo, useState } from "react"
 import type { CharacteristicResponse } from "@/lib/api/catalog"
 import { saveCharacteristicAction, type ActionState } from "@/app/dashboard/catalog/characteristics/actions"
 import {
@@ -38,6 +38,19 @@ export function CharacteristicFormSheet({
   characteristic,
 }: CharacteristicFormSheetProps) {
   const isEdit = Boolean(characteristic)
+
+  // Controlled active toggle — keep it in sync with the characteristic being
+  // edited so Switch never flips from uncontrolled to controlled. Reset the
+  // value during render (not in an effect) whenever the sheet starts editing
+  // a different characteristic — the React-recommended way to derive state
+  // from changing props without cascading effects.
+  const defaultActive = characteristic ? characteristic.active : true
+  const [active, setActive] = useState(defaultActive)
+  const [activeFor, setActiveFor] = useState(characteristic?.id)
+  if (activeFor !== characteristic?.id) {
+    setActiveFor(characteristic?.id)
+    setActive(defaultActive)
+  }
 
   const boundAction = useMemo(
     () => saveCharacteristicAction.bind(null, characteristic?.id),
@@ -161,7 +174,8 @@ export function CharacteristicFormSheet({
             <Switch
               id="cf-active"
               name="active"
-              defaultChecked={characteristic ? characteristic.active : true}
+              checked={active}
+              onCheckedChange={setActive}
               disabled={isPending}
             />
           </div>

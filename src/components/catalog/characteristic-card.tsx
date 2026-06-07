@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useMemo } from "react"
+import { useState, useActionState, useEffect, useMemo } from "react"
 import { Pencil, Trash2, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +42,15 @@ export function CharacteristicCard({ characteristic }: CharacteristicCardProps) 
     boundDeleteAction,
     initialState,
   )
+
+  // Close the confirmation dialog only after a successful delete (no errors,
+  // not the initial empty state). Closing eagerly on click would unmount the
+  // <form> — and the pending submission — before the server action runs.
+  useEffect(() => {
+    if (!isDeletePending && deleteState.errors.length === 0 && deleteState !== initialState) {
+      queueMicrotask(() => setDeleteConfirmOpen(false))
+    }
+  }, [deleteState, isDeletePending])
 
   return (
     <div className="flex flex-col gap-3.5 rounded-3xl border border-border bg-card p-[18px] shadow-[var(--shadow-card)]">
@@ -120,16 +129,16 @@ export function CharacteristicCard({ characteristic }: CharacteristicCardProps) 
               This will permanently delete &quot;{characteristic.name}&quot;. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <form action={deleteFormAction}>
+          <AlertDialogFooter className="flex-col sm:flex-row">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <form action={deleteFormAction} className="w-full sm:w-auto">
               <AlertDialogAction
                 type="submit"
                 variant="destructive"
                 disabled={isDeletePending}
-                onClick={() => setDeleteConfirmOpen(false)}
+                className="w-full sm:w-auto"
               >
-                Delete
+                {isDeletePending ? "Deleting…" : "Delete"}
               </AlertDialogAction>
             </form>
           </AlertDialogFooter>
