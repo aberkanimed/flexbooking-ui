@@ -1,9 +1,10 @@
-import { getServices } from "@/lib/api/catalog"
+import { getServices, getAllProducts } from "@/lib/api/catalog"
 import { ServiceCard } from "@/components/catalog/service-card"
-import { Wrench, Plus } from "lucide-react"
+import { AddServiceButton } from "@/components/catalog/add-service-button"
+import { Wrench } from "lucide-react"
 
 export default async function ServicesPage() {
-  const services = await getServices()
+  const [services, products] = await Promise.all([getServices(), getAllProducts()])
   const count = services.length
 
   return (
@@ -24,10 +25,7 @@ export default async function ServicesPage() {
               : `${count} ${count === 1 ? "service" : "services"} in your catalog.`}
           </p>
         </div>
-        <button className="hidden sm:inline-flex items-center gap-2 h-[46px] shrink-0 rounded-full px-5 bg-primary text-primary-foreground font-semibold text-[15px] shadow-[var(--shadow-cta)] hover:bg-primary-deep transition-colors duration-150 whitespace-nowrap">
-          <Plus className="size-[18px]" />
-          Add a service
-        </button>
+        <AddServiceButton products={products} />
       </header>
 
       {/* Grid or empty state */}
@@ -44,7 +42,7 @@ export default async function ServicesPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3 sm:gap-4 lg:gap-[18px]">
+        <div className="grid grid-cols-1 gap-3.5 pb-24 sm:grid-cols-2 sm:pb-0 xl:grid-cols-3 sm:gap-4 lg:gap-[18px]">
           {services.map((service) => (
             <ServiceCard key={service.id} service={service} />
           ))}
