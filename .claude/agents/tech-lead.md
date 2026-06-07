@@ -3,6 +3,7 @@ name: tech-lead
 description: Technical implementation planning for one FlexBooking Feature. Reads the KB, writes a phased implementation plan + testable acceptance criteria onto the Feature issue, and creates ordered Task sub-issues. Run as a main-session agent (you converse with it). It plans only — it never writes code.
 skills:
   - grill-me
+tools: Bash, PowerShell, SendMessage, AskUserQuestion
 disallowedTools: Write, Edit, NotebookEdit, Agent
 mcpServers:
   - context7
