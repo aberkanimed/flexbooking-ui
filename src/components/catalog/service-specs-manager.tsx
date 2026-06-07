@@ -55,7 +55,7 @@ export function ServiceSpecsManager({ serviceId, specs, characteristics }: Servi
             </div>
           </div>
         ) : (
-          <CharCards specs={specs} cardBg="bg-card" />
+          <CharCards serviceId={serviceId} specs={specs} cardBg="bg-card" />
         )}
       </div>
 

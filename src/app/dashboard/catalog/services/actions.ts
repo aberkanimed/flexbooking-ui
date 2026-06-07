@@ -7,6 +7,7 @@ import {
   updateService,
   deleteService,
   addServiceCharacteristics,
+  removeServiceCharacteristics,
   type ServiceRequest,
   type ServiceUpdateRequest,
   type CharacteristicSpecificationRequest,
@@ -193,6 +194,24 @@ export async function addSpecAction(
 
   try {
     await addServiceCharacteristics(serviceId, [spec])
+    revalidatePath(`/dashboard/catalog/services/${serviceId}`)
+    return { errors: [] }
+  } catch (err) {
+    const errors =
+      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+    return { errors }
+  }
+}
+
+/** Remove an attached characteristic specification from a service. */
+export async function removeSpecAction(
+  serviceId: string,
+  specId: string,
+  _prev: ActionState,
+  _formData: FormData,
+): Promise<ActionState> {
+  try {
+    await removeServiceCharacteristics(serviceId, [specId])
     revalidatePath(`/dashboard/catalog/services/${serviceId}`)
     return { errors: [] }
   } catch (err) {
