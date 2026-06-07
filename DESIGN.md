@@ -202,7 +202,7 @@ Base: `--radius: 0.625rem` (10px)
 | Component | File | Use for |
 |-----------|------|---------|
 | TopHeader | `top-header.tsx` | App header — logo, nav tabs, search, notifications, avatar |
-| BottomNav | `bottom-nav.tsx` | Mobile-only tab bar (hidden on sm+); links: Products, Services, Characteristics — only entries with shipped pages |
+| BottomNav | `bottom-nav.tsx` | Mobile-only tab bar (hidden on sm+); links: Products, Services, Items — only entries with shipped pages. Note: the "Items" label is UI copy for the `/dashboard/catalog/characteristics` route — the underlying entity, route, and component names remain "characteristic(s)" |
 | MobileDrawer | `mobile-drawer.tsx` | Sheet-based nav drawer for mobile |
 | SidebarNav | `sidebar-nav.tsx` | Grouped nav items used inside MobileDrawer |
 
