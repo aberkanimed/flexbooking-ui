@@ -11,7 +11,7 @@ const navGroups = [
     items: [
       { label: "Products", href: "/dashboard/catalog/products", icon: Package },
       { label: "Services", href: "/dashboard/catalog/services", icon: Wrench },
-      { label: "Characteristics", href: "/dashboard/catalog/characteristics", icon: Tag },
+      { label: "Items", href: "/dashboard/catalog/characteristics", icon: Tag },
     ],
   },
 ]

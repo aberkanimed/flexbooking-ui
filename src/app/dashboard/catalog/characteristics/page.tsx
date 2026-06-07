@@ -16,12 +16,12 @@ export default async function CharacteristicsPage() {
             Your catalog
           </p>
           <h1 className="font-heading text-[30px] font-bold tracking-[-0.03em] leading-[1.02] sm:text-[38px] lg:text-[44px]">
-            Characteristics
+            Items
           </h1>
           <p className="mt-2.5 text-[15px] text-muted-foreground max-w-[460px] leading-relaxed lg:text-base">
             {count === 0
-              ? "No characteristics yet."
-              : `${count} ${count === 1 ? "characteristic" : "characteristics"} in your catalog.`}
+              ? "No items yet."
+              : `${count} ${count === 1 ? "item" : "items"} in your catalog.`}
           </p>
         </div>
         <AddCharacteristicButton />
@@ -34,9 +34,9 @@ export default async function CharacteristicsPage() {
             <Tag className="size-7" />
           </div>
           <div>
-            <p className="font-heading text-xl font-bold">No characteristics found</p>
+            <p className="font-heading text-xl font-bold">No items found</p>
             <p className="mt-1 text-sm text-muted-foreground max-w-[320px] leading-relaxed">
-              Add a characteristic to start building your services catalog.
+              Add an item to start building your services catalog.
             </p>
           </div>
         </div>

@@ -53,7 +53,10 @@ export function CharacteristicFormSheet({
       !state.fieldErrors &&
       state !== initialState
     ) {
-      onOpenChange(false)
+      // Defer to avoid "Cannot update a component while rendering a different
+      // component" — revalidatePath triggers a server-component re-render at
+      // the same time this effect would otherwise call onOpenChange synchronously.
+      queueMicrotask(() => onOpenChange(false))
     }
   }, [state, isPending, onOpenChange])
 
@@ -62,7 +65,7 @@ export function CharacteristicFormSheet({
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="pb-2">
           <SheetTitle>
-            {isEdit ? "Edit characteristic" : "Add a characteristic"}
+            {isEdit ? "Edit item" : "Add an item"}
           </SheetTitle>
         </SheetHeader>
 
@@ -179,7 +182,7 @@ export function CharacteristicFormSheet({
                   : "Creating…"
                 : isEdit
                   ? "Save changes"
-                  : "Create characteristic"}
+                  : "Create item"}
             </Button>
           </SheetFooter>
         </form>

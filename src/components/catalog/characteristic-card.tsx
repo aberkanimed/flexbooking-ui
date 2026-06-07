@@ -115,23 +115,23 @@ export function CharacteristicCard({ characteristic }: CharacteristicCardProps) 
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete characteristic?</AlertDialogTitle>
+            <AlertDialogTitle>Delete item?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete &quot;{characteristic.name}&quot;. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={isDeletePending}
-              onClick={() => {
-                setDeleteConfirmOpen(false)
-                deleteFormAction(new FormData())
-              }}
-            >
-              Delete
-            </AlertDialogAction>
+            <form action={deleteFormAction}>
+              <AlertDialogAction
+                type="submit"
+                variant="destructive"
+                disabled={isDeletePending}
+                onClick={() => setDeleteConfirmOpen(false)}
+              >
+                Delete
+              </AlertDialogAction>
+            </form>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

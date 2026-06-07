@@ -21,13 +21,13 @@ export function AddCharacteristicButton() {
         )}
       >
         <Plus className="size-[18px]" />
-        Add a characteristic
+        Add an item
       </button>
 
       {/* FAB — mobile only (below sm), positioned above the bottom nav */}
       <button
         type="button"
-        aria-label="Add a characteristic"
+        aria-label="Add an item"
         onClick={() => setOpen(true)}
         className={cn(
           "sm:hidden fixed bottom-20 right-4 z-30",
