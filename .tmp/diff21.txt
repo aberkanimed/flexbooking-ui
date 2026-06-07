@@ -1,0 +1,16 @@
+﻿diff --git a/src/app/dashboard/catalog/characteristics/page.tsx b/src/app/dashboard/catalog/characteristics/page.tsx
+index 78d8532..716b983 100644
+--- a/src/app/dashboard/catalog/characteristics/page.tsx
++++ b/src/app/dashboard/catalog/characteristics/page.tsx
+@@ -4,7 +4,10 @@ import { AddCharacteristicButton } from "@/components/catalog/add-characteristic
+ import { Tag } from "lucide-react"
+ 
+ export default async function CharacteristicsPage() {
+-  const characteristics = await getAllCharacteristics()
++  const allCharacteristics = await getAllCharacteristics()
++  // Deleting a characteristic soft-deactivates it server-side; the list should
++  // only show active items so a deleted characteristic disappears from view.
++  const characteristics = allCharacteristics.filter((characteristic) => characteristic.active)
+   const count = characteristics.length
+ 
+   return (

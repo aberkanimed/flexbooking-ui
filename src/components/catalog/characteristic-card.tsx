@@ -124,9 +124,9 @@ export function CharacteristicCard({ characteristic }: CharacteristicCardProps) 
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete item?</AlertDialogTitle>
+            <AlertDialogTitle>Remove item?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete &quot;{characteristic.name}&quot;. This action cannot be undone.
+              &quot;{characteristic.name}&quot; will be deactivated and removed from this list. You can bring it back later by editing it and turning it active again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row">
