@@ -4,7 +4,12 @@ description: Implements a single approved Task from a FlexBooking Feature, follo
 mcpServers:
   - context7
   - shadcn
-disallowedTools: WebFetch, WebSearch
+tools: Read, Write, Edit, Grep, Glob, Bash, Skill, mcp__context7, mcp__shadcn
+disallowedTools: WebFetch, WebSearch, SendMessage, Agent, Task
+skills: 
+   - powershell-shell
+   - gh-cli
+   - file-ops
 model: sonnet
 ---
 

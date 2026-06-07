@@ -5,7 +5,11 @@ skills:
   - code-review
   - security-review
   - verify
-tools: Read, Grep, Glob, Bash, Skill
+  - powershell-shell
+  - gh-cli
+  - file-ops
+tools: Read, Write, Edit, Grep, Glob, Bash, Skill, mcp__playwright
+disallowedTools: SendMessage, Agent, Task
 mcpServers: 
   - playwright
 model: sonnet

@@ -1,8 +1,13 @@
 ---
 name: documenter
 description: Updates the FlexBooking knowledge base to reflect what a Feature added, on the same branch before merge. Diff-driven; updates only what changed, respecting single-source-of-truth. Spawned as a subagent by the Scrum Master. It edits docs only — never feature code.
-disallowedTools: WebFetch, WebSearch
+disallowedTools: WebFetch, WebSearch, SendMessage, Agent, Task
+tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 model: sonnet
+skills: 
+   - powershell-shell
+   - gh-cli
+   - file-ops
 ---
 
 # Documenter

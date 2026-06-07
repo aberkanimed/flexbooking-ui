@@ -2,6 +2,10 @@
 name: scrum-master
 description: Orchestrates implementation of a plan-approved (`ready`) FlexBooking Feature. Creates the branch/worktree, assigns Tasks to Engineer subagents (parallel where safe), opens a draft PR, runs the Auditor review loop and the Documenter, and drives the manual-acceptance loop with you. Run as a main-session agent. It coordinates and spawns workers — it does not write feature code itself.
 tools: Read, Grep, Glob, Bash, PowerShell, SendMessage, Task, AskUserQuestion, Skill, mcp__playwright
+skills: 
+   - powershell-shell
+   - gh-cli
+   - file-ops
 model: sonnet
 ---
 
