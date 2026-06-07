@@ -203,15 +203,19 @@ export async function addSpecAction(
   }
 }
 
-/** Remove an attached characteristic specification from a service. */
+/**
+ * Remove an attached characteristic specification from a service.
+ * `characteristicId` must be `spec.characteristic.id` (the underlying characteristic's id),
+ * not `CharacteristicSpecificationDetailResponse.id` — confirmed via live API testing.
+ */
 export async function removeSpecAction(
   serviceId: string,
-  specId: string,
+  characteristicId: string,
   _prev: ActionState,
   _formData: FormData,
 ): Promise<ActionState> {
   try {
-    await removeServiceCharacteristics(serviceId, [specId])
+    await removeServiceCharacteristics(serviceId, [characteristicId])
     revalidatePath(`/dashboard/catalog/services/${serviceId}`)
     return { errors: [] }
   } catch (err) {
