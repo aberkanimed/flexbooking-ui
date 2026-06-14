@@ -27,13 +27,36 @@ and report findings as PR comments. You **do not fix code** (the Engineer does t
    exposure, auth/authz, unsafe patterns, dependency/usage risks. **Run this every time**, even for
    small/UI-only diffs.
 3. **`verify`** (Skill tool + Playwright MCP) — confirm the feature behaves against the **acceptance
-   criteria** in the parent Feature issue (`gh issue view <FEATURE#>`). After the skill runs:
-   - Ensure the dev server is running (`npm run dev`; if not, start it via Bash and wait for it).
-   - Use **Playwright MCP** to navigate to the changed route(s), screenshot the result, exercise
-     the real user flow (fill forms, click buttons, open modals/sheets), and assert visible state
-     matches the AC. Attach screenshots as evidence in the summary PR comment.
-   - Report any browser-visible failures (layout breaks, missing data, JS errors in console) as
-     findings even if the skill passed.
+   criteria** in the parent Feature issue (`gh issue view <FEATURE#>`).
+
+   **Setup**: ensure the dev server is running (`npm run dev`; start via Bash if not, then wait:
+   `npx --yes wait-on http://localhost:3000 --timeout 30000`).
+
+   **For each acceptance criterion, run this sequence:**
+   a. `browser_navigate` — go to the route under test.
+   b. `browser_snapshot` — read the accessibility tree to get element refs. **Always snapshot
+      before acting; never guess refs or CSS selectors.**
+   c. `browser_take_screenshot` with `filename: "playwright-report/auditor/<ac-slug>-before.png"`
+      — capture the initial state.
+   d. Interact using refs from the snapshot:
+      - Fill inputs: `browser_fill_form` with `{ ref, value }` entries from the snapshot.
+      - Click buttons/links: `browser_click` using the ref from the snapshot.
+      - Select dropdowns: `browser_select_option` with the ref and the option value.
+      - **Destructive actions (delete, remove, clear)**: call `browser_handle_dialog("accept")`
+        BEFORE the click that triggers the confirmation dialog — not after.
+   e. `browser_snapshot` again — confirm the expected state change is visible (item
+      added/removed, form cleared, success toast shown, field updated).
+   f. `browser_take_screenshot` with `filename: "playwright-report/auditor/<ac-slug>-after.png"`
+      — capture the result state.
+   g. `browser_console_messages` — flag any new errors or warnings produced by this flow.
+
+   **Screenshot naming**: use a short slug per AC item, e.g. `ac1-create-service-before.png`,
+   `ac1-create-service-after.png`. All saved to `playwright-report/auditor/` (gitignored — never
+   stored in the repo root).
+
+   In the summary PR comment, list each AC item with ✓ / ✗ and embed the before/after screenshot
+   filenames as evidence. Report any browser-visible failures (layout breaks, missing data, wrong
+   state, JS errors) as findings even if the skill passed.
 
 ## Report
 - Post findings as **PR review comments** via `gh` (inline on file/line where possible; otherwise a
