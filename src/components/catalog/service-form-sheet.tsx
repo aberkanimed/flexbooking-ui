@@ -38,9 +38,17 @@ export function ServiceFormSheet({ open, onOpenChange, service, products = [] }:
   const isEdit = Boolean(service)
 
   // Controlled active toggle — keep it in sync with the service being edited
-  // so Switch never flips from uncontrolled to controlled.
+  // so Switch never flips from uncontrolled to controlled. Reset the value
+  // during render (not in an effect) whenever the sheet starts editing a
+  // different service — the React-recommended way to derive state from
+  // changing props without cascading effects.
   const defaultActive = service ? service.active : true
   const [active, setActive] = useState(defaultActive)
+  const [activeFor, setActiveFor] = useState(service?.id)
+  if (activeFor !== service?.id) {
+    setActiveFor(service?.id)
+    setActive(defaultActive)
+  }
 
   const boundAction = useMemo(() => saveServiceAction.bind(null, service?.id), [service?.id])
   const [state, formAction, isPending] = useActionState(boundAction, initialState)

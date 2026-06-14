@@ -44,6 +44,7 @@ export function SpecFormSheet({
   serviceId,
   availableCharacteristics,
 }: SpecFormSheetProps) {
+  const [characteristicId, setCharacteristicId] = useState("")
   const [configurable, setConfigurable] = useState(true)
   const [active, setActive] = useState(true)
   const [mode, setMode] = useState<"range" | "values">("values")
@@ -58,6 +59,7 @@ export function SpecFormSheet({
   useEffect(() => {
     if (open) {
       queueMicrotask(() => {
+        setCharacteristicId("")
         setConfigurable(true)
         setActive(true)
         setMode("values")
@@ -117,7 +119,12 @@ export function SpecFormSheet({
           {/* Item */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="sf-item">Item</Label>
-            <Select name="characteristicId" disabled={isPending}>
+            <Select
+              name="characteristicId"
+              value={characteristicId}
+              onValueChange={(v) => setCharacteristicId(v ?? "")}
+              disabled={isPending}
+            >
               <SelectTrigger
                 id="sf-item"
                 className="w-full"
