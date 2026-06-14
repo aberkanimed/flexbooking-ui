@@ -36,6 +36,14 @@ On listing pages with a mobile floating-action-button (`AddCharacteristicButton`
 **Controlled `Switch` when its initial value depends on a changing prop**
 If a `Switch`'s starting value comes from a prop that can change across renders/remounts (e.g. the same edit sheet reused for different rows), use a fully controlled `checked` / `onCheckedChange` with state reset keyed on the entity id — not `defaultChecked`. Otherwise base-ui logs an "uncontrolled Switch changing default checked state" warning. See `characteristic-form-sheet.tsx`.
 
+**Trace ALS is scoped to `runWithTrace` — plain Server Components are not auto-seeded**
+`currentTraceId()` and the automatic `traceId` stamp on `LogRecord` only work inside a
+`runWithTrace` scope. `apiFetch`/`apiMutate` call `runWithTrace` automatically, so logger calls
+made *during* a catalog fetch are stamped. Logger calls in a plain Server Component render body
+are **not** stamped unless you manually wrap them with `runWithTrace`. Server Actions will be
+covered by `instrumentAction` (Feature #32, not yet shipped). Use `getTraceId()` (async) when
+you only need the id string itself; use `runWithTrace` when you need the logger to stamp it.
+
 **`"use server"` modules may only export async functions — not consts/types-as-values**
 A file with `"use server"` at the top is a server-action boundary: **only `async function` exports
 survive** the client/server split. Exporting a plain `const initialState = { errors: [] }` (or any
