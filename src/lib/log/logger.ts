@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { getActiveSink } from './sink'
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -56,7 +58,7 @@ function emit(
     ...(context !== undefined ? { context } : {}),
   }
 
-  process.stdout.write(JSON.stringify(record) + '\n')
+  getActiveSink().write(record)
 }
 
 // ---------------------------------------------------------------------------

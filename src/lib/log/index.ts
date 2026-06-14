@@ -1,2 +1,4 @@
 export { logger } from './logger'
 export type { LogLevel, LogRecord } from './logger'
+export { setSink, StdoutSink } from './sink'
+export type { Sink } from './sink'
