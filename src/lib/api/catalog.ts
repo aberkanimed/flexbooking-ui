@@ -1,4 +1,4 @@
-import { getTraceId } from '@/lib/log'
+import { getTraceId, runWithTrace } from '@/lib/log'
 
 export interface ProductResponse {
   id: string
@@ -71,12 +71,17 @@ async function apiFetch<T>(path: string): Promise<T> {
   const traceId = await getTraceId()
   const headers: Record<string, string> = {}
   if (traceId !== null) headers['x-trace-id'] = traceId
-  const res = await fetch(`${BASE_URL}${path}`, {
-    cache: 'no-store',
-    ...(Object.keys(headers).length > 0 ? { headers } : {}),
-  })
-  if (!res.ok) throw new Error(`API error ${res.status}: ${path}`)
-  return res.json()
+
+  const run = async () => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      cache: 'no-store',
+      headers,
+    })
+    if (!res.ok) throw new Error(`API error ${res.status}: ${path}`)
+    return res.json() as Promise<T>
+  }
+
+  return traceId !== null ? runWithTrace(traceId, run) : run()
 }
 
 /**
@@ -93,29 +98,34 @@ async function apiMutate<T>(
   const headers: Record<string, string> = {}
   if (traceId !== null) headers['x-trace-id'] = traceId
   if (body !== undefined) headers['Content-Type'] = 'application/json'
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    cache: 'no-store',
-    ...(Object.keys(headers).length > 0 ? { headers } : {}),
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-  })
-  if (!res.ok) {
-    let errors: string[] = [`Request failed with status ${res.status}`]
-    try {
-      const errBody: ApiErrorResponse = await res.json()
-      if (Array.isArray(errBody.errors) && errBody.errors.length > 0) {
-        errors = errBody.errors
+
+  const run = async () => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      cache: 'no-store',
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    })
+    if (!res.ok) {
+      let errors: string[] = [`Request failed with status ${res.status}`]
+      try {
+        const errBody: ApiErrorResponse = await res.json()
+        if (Array.isArray(errBody.errors) && errBody.errors.length > 0) {
+          errors = errBody.errors
+        }
+      } catch {
+        // body was not JSON; keep the default message
       }
-    } catch {
-      // body was not JSON; keep the default message
+      const err = new Error(errors.join('; ')) as Error & { errors: string[] }
+      err.errors = errors
+      throw err
     }
-    const err = new Error(errors.join('; ')) as Error & { errors: string[] }
-    err.errors = errors
-    throw err
+    // 204 No Content — nothing to parse
+    if (res.status === 204) return undefined as T
+    return res.json() as Promise<T>
   }
-  // 204 No Content — nothing to parse
-  if (res.status === 204) return undefined as T
-  return res.json()
+
+  return traceId !== null ? runWithTrace(traceId, run) : run()
 }
 
 // ---------------------------------------------------------------------------
