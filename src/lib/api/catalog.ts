@@ -78,9 +78,10 @@ async function apiFetch<T>(path: string): Promise<T> {
       headers,
     })
     if (!res.ok) throw new Error(`API error ${res.status}: ${path}`)
-    return res.json() as Promise<T>
+    return (await res.json()) as T
   }
 
+  // No trace context available (no middleware header); logs will emit without traceId
   return traceId !== null ? runWithTrace(traceId, run) : run()
 }
 
@@ -122,9 +123,10 @@ async function apiMutate<T>(
     }
     // 204 No Content — nothing to parse
     if (res.status === 204) return undefined as T
-    return res.json() as Promise<T>
+    return (await res.json()) as T
   }
 
+  // No trace context available (no middleware header); logs will emit without traceId
   return traceId !== null ? runWithTrace(traceId, run) : run()
 }
 
