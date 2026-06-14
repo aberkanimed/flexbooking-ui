@@ -20,10 +20,8 @@ const DEFAULT_DENY_LIST = [
 function resolveDenyList(): string[] {
   const override = process.env.LOG_REDACT_FIELDS
   if (override) {
-    return override
-      .split(',')
-      .map((f) => f.trim().toLowerCase())
-      .filter(Boolean)
+    const custom = override.split(',').map((f) => f.trim().toLowerCase()).filter(Boolean)
+    return [...new Set([...DEFAULT_DENY_LIST, ...custom])]
   }
   return DEFAULT_DENY_LIST
 }
