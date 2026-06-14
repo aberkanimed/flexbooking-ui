@@ -2,6 +2,7 @@ import 'server-only'
 
 import { getActiveSink } from './sink'
 import { redact } from './redact'
+import { currentTraceId } from './trace'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,6 +15,7 @@ export interface LogRecord {
   level: LogLevel
   event: string
   message: string
+  traceId?: string
   context?: Record<string, unknown>
 }
 
@@ -51,11 +53,14 @@ function emit(
   const minLevel = resolveMinLevel()
   if (LEVEL_ORDER[level] < LEVEL_ORDER[minLevel]) return
 
+  const traceId = currentTraceId()
+
   const record: LogRecord = {
     timestamp: new Date().toISOString(),
     level,
     event,
     message,
+    ...(traceId !== null ? { traceId } : {}),
     ...(context !== undefined ? { context: redact(context) } : {}),
   }
 

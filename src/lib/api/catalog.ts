@@ -1,3 +1,5 @@
+import { getTraceId, runWithTrace } from '@/lib/log'
+
 export interface ProductResponse {
   id: string
   name: string
@@ -66,9 +68,21 @@ const BASE_URL = process.env.CATALOG_API_URL ?? 'http://localhost:8080/api'
 
 /** GET wrapper — read-only, no body. */
 async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, { cache: 'no-store' })
-  if (!res.ok) throw new Error(`API error ${res.status}: ${path}`)
-  return res.json()
+  const traceId = await getTraceId()
+  const headers: Record<string, string> = {}
+  if (traceId !== null) headers['x-trace-id'] = traceId
+
+  const run = async () => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      cache: 'no-store',
+      headers,
+    })
+    if (!res.ok) throw new Error(`API error ${res.status}: ${path}`)
+    return (await res.json()) as T
+  }
+
+  // No trace context available (no middleware header); logs will emit without traceId
+  return traceId !== null ? runWithTrace(traceId, run) : run()
 }
 
 /**
@@ -81,30 +95,39 @@ async function apiMutate<T>(
   method: 'POST' | 'PUT' | 'DELETE',
   body?: unknown,
 ): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    cache: 'no-store',
-    ...(body !== undefined
-      ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-      : {}),
-  })
-  if (!res.ok) {
-    let errors: string[] = [`Request failed with status ${res.status}`]
-    try {
-      const errBody: ApiErrorResponse = await res.json()
-      if (Array.isArray(errBody.errors) && errBody.errors.length > 0) {
-        errors = errBody.errors
+  const traceId = await getTraceId()
+  const headers: Record<string, string> = {}
+  if (traceId !== null) headers['x-trace-id'] = traceId
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+
+  const run = async () => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      cache: 'no-store',
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    })
+    if (!res.ok) {
+      let errors: string[] = [`Request failed with status ${res.status}`]
+      try {
+        const errBody: ApiErrorResponse = await res.json()
+        if (Array.isArray(errBody.errors) && errBody.errors.length > 0) {
+          errors = errBody.errors
+        }
+      } catch {
+        // body was not JSON; keep the default message
       }
-    } catch {
-      // body was not JSON; keep the default message
+      const err = new Error(errors.join('; ')) as Error & { errors: string[] }
+      err.errors = errors
+      throw err
     }
-    const err = new Error(errors.join('; ')) as Error & { errors: string[] }
-    err.errors = errors
-    throw err
+    // 204 No Content — nothing to parse
+    if (res.status === 204) return undefined as T
+    return (await res.json()) as T
   }
-  // 204 No Content — nothing to parse
-  if (res.status === 204) return undefined as T
-  return res.json()
+
+  // No trace context available (no middleware header); logs will emit without traceId
+  return traceId !== null ? runWithTrace(traceId, run) : run()
 }
 
 // ---------------------------------------------------------------------------
