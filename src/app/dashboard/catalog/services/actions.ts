@@ -205,17 +205,19 @@ export async function addSpecAction(
 
 /**
  * Remove an attached characteristic specification from a service.
- * `characteristicId` must be `spec.characteristic.id` (the underlying characteristic's id),
- * not `CharacteristicSpecificationDetailResponse.id` — confirmed via live API testing.
+ * `specId` must be `spec.id` (the CharacteristicSpecificationDetailResponse id, the
+ * specification's own UUID), NOT `spec.characteristic.id` (the standalone characteristic UUID).
+ * The backend validates by specification id — sending the characteristic id causes a
+ * "UUID not associated with this service" error.
  */
 export async function removeSpecAction(
   serviceId: string,
-  characteristicId: string,
+  specId: string,
   _prev: ActionState,
   _formData: FormData,
 ): Promise<ActionState> {
   try {
-    await removeServiceCharacteristics(serviceId, [characteristicId])
+    await removeServiceCharacteristics(serviceId, [specId])
     revalidatePath(`/dashboard/catalog/services/${serviceId}`)
     return { errors: [] }
   } catch (err) {

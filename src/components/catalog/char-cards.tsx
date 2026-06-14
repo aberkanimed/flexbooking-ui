@@ -114,8 +114,8 @@ function RemoveSpecControl({
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const boundRemoveAction = useMemo(
-    () => removeSpecAction.bind(null, serviceId, spec.characteristic.id),
-    [serviceId, spec.characteristic.id],
+    () => removeSpecAction.bind(null, serviceId, spec.id),
+    [serviceId, spec.id],
   )
   const [removeState, removeFormAction, isRemovePending] = useActionState(
     boundRemoveAction,

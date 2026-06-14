@@ -246,11 +246,10 @@ export async function addServiceCharacteristics(
 
 /** DELETE /v1/catalog/services/{id}/characteristics — removes characteristic specs from a service, expects 204 No Content. */
 export async function removeServiceCharacteristics(serviceId: string, ids: string[]): Promise<void> {
-  // `ids` must be the underlying characteristic ids (`spec.characteristic.id`), NOT
-  // `CharacteristicSpecificationDetailResponse.id`. Confirmed empirically via live API
-  // testing — passing the specification id fails with "Characteristic uuid (...) is not
-  // associated with this service." The OpenAPI schema's "specification id" framing for
-  // this field is misleading; do not revert this based on docs alone.
+  // `ids` must be CharacteristicSpecificationDetailResponse.id (the specification's own UUID),
+  // NOT spec.characteristic.id (the standalone characteristic UUID). The backend validates
+  // by specification id — sending the characteristic id causes "UUID not associated with
+  // this service" errors.
   return apiMutate<void>(`/v1/catalog/services/${serviceId}/characteristics`, 'DELETE', {
     characteristics: ids,
   })
