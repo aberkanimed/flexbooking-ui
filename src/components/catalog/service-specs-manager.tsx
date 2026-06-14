@@ -20,7 +20,7 @@ export function ServiceSpecsManager({ serviceId, specs, characteristics }: Servi
   // filtered list (and reallocating the Set) on every render.
   const availableCharacteristics = useMemo(() => {
     const attachedIds = new Set(specs.map((s) => s.characteristic.id))
-    return characteristics.filter((c) => c.active && !attachedIds.has(c.id))
+    return characteristics.filter((c) => !attachedIds.has(c.id))
   }, [specs, characteristics])
 
   return (
@@ -29,7 +29,7 @@ export function ServiceSpecsManager({ serviceId, specs, characteristics }: Servi
         <div>
           <h2 className="font-heading text-[22px] font-bold tracking-[-0.02em]">Items & pricing</h2>
           <p className="text-[13.5px] text-muted-foreground mt-1">
-            Characteristics and add-on prices for this service.
+            Items and add-on prices for this service.
           </p>
         </div>
         <Button

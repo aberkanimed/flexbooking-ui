@@ -115,7 +115,7 @@ export async function addSpecAction(
 
   const fieldErrors: NonNullable<SpecActionState["fieldErrors"]> = {}
 
-  if (!characteristicId) fieldErrors.characteristicId = "Choose a characteristic."
+  if (!characteristicId) fieldErrors.characteristicId = "Choose an item."
   if (!unitOfMeasure) fieldErrors.unitOfMeasure = "Choose a unit of measure."
 
   let price = 0

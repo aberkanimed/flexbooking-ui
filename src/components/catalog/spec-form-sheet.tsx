@@ -96,7 +96,7 @@ export function SpecFormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="pb-2">
-          <SheetTitle>Attach a characteristic</SheetTitle>
+          <SheetTitle>Add an item</SheetTitle>
         </SheetHeader>
 
         <form action={formAction} className="flex flex-col gap-5 px-4 py-2 flex-1">
@@ -114,19 +114,19 @@ export function SpecFormSheet({
             </div>
           )}
 
-          {/* Characteristic */}
+          {/* Item */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="sf-characteristic">Characteristic</Label>
+            <Label htmlFor="sf-item">Item</Label>
             <Select name="characteristicId" disabled={isPending}>
               <SelectTrigger
-                id="sf-characteristic"
+                id="sf-item"
                 className="w-full"
                 aria-invalid={Boolean(state.fieldErrors?.characteristicId)}
                 aria-describedby={
-                  state.fieldErrors?.characteristicId ? "sf-characteristic-err" : undefined
+                  state.fieldErrors?.characteristicId ? "sf-item-err" : undefined
                 }
               >
-                <SelectValue placeholder="Select a characteristic" />
+                <SelectValue placeholder="Select an item" />
               </SelectTrigger>
               <SelectContent>
                 {availableCharacteristics.map((c) => (
@@ -137,7 +137,7 @@ export function SpecFormSheet({
               </SelectContent>
             </Select>
             {state.fieldErrors?.characteristicId && (
-              <p id="sf-characteristic-err" className="text-[13px] text-destructive">
+              <p id="sf-item-err" className="text-[13px] text-destructive">
                 {state.fieldErrors.characteristicId}
               </p>
             )}
@@ -360,7 +360,7 @@ export function SpecFormSheet({
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Attaching…" : "Attach characteristic"}
+              {isPending ? "Adding…" : "Add item"}
             </Button>
           </SheetFooter>
         </form>
