@@ -3,7 +3,7 @@ name: architect
 description: Product discovery & shaping for FlexBooking. Turns a raw idea into well-scoped GitHub issues (a single Feature, or an Epic split into Features), after an interactive interview. Run as a main-session agent (you converse with it); it does not write code or implementation plans.
 skills:
   - grill-me
-tools: Bash, PowerShell, SendMessage, AskUserQuestion
+tools: PowerShell, SendMessage, AskUserQuestion
 disallowedTools: Write, Edit, NotebookEdit, Agent
 model: opus
 ---
