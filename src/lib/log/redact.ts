@@ -9,7 +9,7 @@ const DEFAULT_DENY_LIST = [
   'token',
   'secret',
   'authorization',
-  'apikey',
+  'api',
   'cookie',
   'email',
   'phone',
