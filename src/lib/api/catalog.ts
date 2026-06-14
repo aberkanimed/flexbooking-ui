@@ -1,3 +1,5 @@
+import { getTraceId } from '@/lib/log'
+
 export interface ProductResponse {
   id: string
   name: string
@@ -66,7 +68,13 @@ const BASE_URL = process.env.CATALOG_API_URL ?? 'http://localhost:8080/api'
 
 /** GET wrapper — read-only, no body. */
 async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, { cache: 'no-store' })
+  const traceId = await getTraceId()
+  const headers: Record<string, string> = {}
+  if (traceId !== null) headers['x-trace-id'] = traceId
+  const res = await fetch(`${BASE_URL}${path}`, {
+    cache: 'no-store',
+    ...(Object.keys(headers).length > 0 ? { headers } : {}),
+  })
   if (!res.ok) throw new Error(`API error ${res.status}: ${path}`)
   return res.json()
 }
@@ -81,12 +89,15 @@ async function apiMutate<T>(
   method: 'POST' | 'PUT' | 'DELETE',
   body?: unknown,
 ): Promise<T> {
+  const traceId = await getTraceId()
+  const headers: Record<string, string> = {}
+  if (traceId !== null) headers['x-trace-id'] = traceId
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     cache: 'no-store',
-    ...(body !== undefined
-      ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-      : {}),
+    ...(Object.keys(headers).length > 0 ? { headers } : {}),
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   })
   if (!res.ok) {
     let errors: string[] = [`Request failed with status ${res.status}`]
