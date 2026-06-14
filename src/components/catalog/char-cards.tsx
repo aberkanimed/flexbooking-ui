@@ -1,6 +1,24 @@
-import { Check, SlidersHorizontal, Type, Hash, ToggleLeft } from "lucide-react"
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
+import { useActionState } from "react"
+import { Check, SlidersHorizontal, Type, Hash, ToggleLeft, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { removeSpecAction, type ActionState } from "@/app/dashboard/catalog/services/actions"
 import type { CharacteristicSpecificationDetailResponse } from "@/lib/api/catalog"
+
+const initialRemoveState: ActionState = { errors: [] }
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 })
 const money = (cents: number) => usd.format(cents / 100)
@@ -86,10 +104,92 @@ function Addon({ spec }: { spec: CharacteristicSpecificationDetailResponse }) {
   )
 }
 
+function RemoveSpecControl({
+  serviceId,
+  spec,
+}: {
+  serviceId: string
+  spec: CharacteristicSpecificationDetailResponse
+}) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  const boundRemoveAction = useMemo(
+    () => removeSpecAction.bind(null, serviceId, spec.id),
+    [serviceId, spec.id],
+  )
+  const [removeState, removeFormAction, isRemovePending] = useActionState(
+    boundRemoveAction,
+    initialRemoveState,
+  )
+
+  // Close the confirmation dialog only after a successful removal (no errors,
+  // not the initial empty state). Closing eagerly on click would unmount the
+  // <form> — and the pending submission — before the server action runs.
+  useEffect(() => {
+    if (!isRemovePending && removeState.errors.length === 0 && removeState !== initialRemoveState) {
+      queueMicrotask(() => setConfirmOpen(false))
+    }
+  }, [removeState, isRemovePending])
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        aria-label={`Remove ${spec.characteristic.name}`}
+        disabled={isRemovePending}
+        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+        onClick={() => setConfirmOpen(true)}
+      >
+        <Trash2 className="size-4" />
+      </Button>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{spec.characteristic.name}&quot; will be removed from this service. This action is permanent.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {removeState.errors.length > 0 && (
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive/40 bg-destructive/8 px-3 py-2.5 text-sm text-destructive"
+            >
+              <ul className="list-inside list-disc space-y-0.5">
+                {removeState.errors.map((e) => (
+                  <li key={e}>{e}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <AlertDialogFooter className="flex-col sm:flex-row">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <form action={removeFormAction} className="w-full sm:w-auto">
+              <AlertDialogAction
+                type="submit"
+                variant="destructive"
+                disabled={isRemovePending}
+                className="w-full sm:w-auto"
+              >
+                {isRemovePending ? "Removing…" : "Remove"}
+              </AlertDialogAction>
+            </form>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  )
+}
+
 export function CharCards({
+  serviceId,
   specs,
   cardBg = "bg-background",
 }: {
+  serviceId: string
   specs: CharacteristicSpecificationDetailResponse[]
   cardBg?: string
 }) {
@@ -124,7 +224,10 @@ export function CharCards({
                 "Fixed"
               )}
             </span>
-            <Addon spec={spec} />
+            <div className="flex items-center gap-1">
+              <Addon spec={spec} />
+              <RemoveSpecControl serviceId={serviceId} spec={spec} />
+            </div>
           </div>
         </div>
       ))}

@@ -200,6 +200,12 @@ Base: `--radius: 0.625rem` (10px)
 | CharacteristicCard | `characteristic-card.tsx` | Items grid card — icon, status pill, name, description, value type; inline edit (opens `CharacteristicFormSheet`) and delete (gated by `AlertDialog`, copy clarifies delete = deactivate, see `docs/kb/api-and-data.md` → soft-delete pattern) |
 | CharacteristicFormSheet | `characteristic-form-sheet.tsx` | Create/edit sheet for a characteristic — name, description, value type (`Select`), active (`Switch`, fully controlled and keyed on entity id to avoid base-ui's "uncontrolled Switch" warning when reused across rows) |
 | AddCharacteristicButton | `add-characteristic-button.tsx` | Opens `CharacteristicFormSheet` in create mode — desktop button / mobile FAB |
+| ServiceFormSheet | `service-form-sheet.tsx` | Create/edit sheet for a service — name, description, base price (cents conversion at the action boundary), product (create-only `Select`), active (`Switch`) |
+| AddServiceButton | `add-service-button.tsx` | Opens `ServiceFormSheet` in create mode — desktop button / mobile FAB |
+| ServiceHeroControls | `service-hero-controls.tsx` | Edit/delete controls on the service detail hero — edit opens `ServiceFormSheet`, delete gated by `AlertDialog` (hard delete — copy says so plainly, unlike the characteristics soft-deactivate copy) |
+| ServiceSpecsManager | `service-specs-manager.tsx` | "Items & pricing" section on service detail — lists attached characteristic specs (`char-cards.tsx`) and opens `SpecFormSheet` to attach a new one |
+| SpecFormSheet | `spec-form-sheet.tsx` | Attach-spec sheet — characteristic (`Select`), configurable/active (`Switch`), unit of measure, price, and a **range vs. value-set** mode toggle (numeric bounds vs. an option list with one default); see `docs/kb/api-and-data.md` → range vs. value-set pattern. Defines `initialSpecState` locally — see `AGENTS.md` → `"use server"` export gotcha |
+| RemoveSpecControl | `char-cards.tsx` | Inline remove control for an attached spec, gated by `AlertDialog`; sends `spec.characteristic.id` (not the spec id) — see `docs/kb/api-and-data.md` → spec removal id gotcha |
 
 ### Shell Components — `src/components/dashboard/`
 

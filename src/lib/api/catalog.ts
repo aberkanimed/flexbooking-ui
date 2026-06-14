@@ -182,3 +182,75 @@ export async function updateCharacteristic(id: string, body: CharacteristicReque
 export async function deleteCharacteristic(id: string): Promise<void> {
   return apiMutate<void>(`/v1/catalog/characteristics/${id}`, 'DELETE')
 }
+
+/** Request body for creating a service. Includes `productId` to associate it with a product. Price is in cents. */
+export interface ServiceRequest {
+  name: string
+  description: string
+  active: boolean
+  basePrice: number
+  productId: string
+}
+
+/** Request body for updating an existing service. No `productId` — services cannot be reassigned to another product. */
+export interface ServiceUpdateRequest {
+  name: string
+  description: string
+  active: boolean
+  basePrice: number
+}
+
+/** POST /v1/catalog/services — creates a new service, returns 201 ServiceResponse. */
+export async function createService(body: ServiceRequest): Promise<ServiceResponse> {
+  return apiMutate<ServiceResponse>('/v1/catalog/services', 'POST', body)
+}
+
+/** PUT /v1/catalog/services/{id} — updates an existing service, returns 200 ServiceResponse. */
+export async function updateService(id: string, body: ServiceUpdateRequest): Promise<ServiceResponse> {
+  return apiMutate<ServiceResponse>(`/v1/catalog/services/${id}`, 'PUT', body)
+}
+
+/** DELETE /v1/catalog/services/{id} — hard delete, expects 204 No Content. */
+export async function deleteService(id: string): Promise<void> {
+  return apiMutate<void>(`/v1/catalog/services/${id}`, 'DELETE')
+}
+
+/** Request body for a single characteristic value when attaching a specification. */
+export interface CharacteristicValueRequest {
+  value: string
+  isDefault: boolean
+}
+
+/** Request body for attaching a characteristic specification to a service. Price is in cents. */
+export interface CharacteristicSpecificationRequest {
+  characteristicId: string
+  configurable: boolean
+  range: boolean
+  valueFrom?: number
+  valueTo?: number
+  unitOfMeasure: 'UNIT' | 'SQUARE_FOOTAGE' | 'HOUR' | 'MINUTE' | 'NONE'
+  price: number
+  active: boolean
+  characteristicValues?: CharacteristicValueRequest[]
+}
+
+/** POST /v1/catalog/services/{id}/characteristics — attaches characteristic specs to a service, returns 201 ServiceDetailResponse. */
+export async function addServiceCharacteristics(
+  serviceId: string,
+  specs: CharacteristicSpecificationRequest[],
+): Promise<ServiceDetailResponse> {
+  return apiMutate<ServiceDetailResponse>(`/v1/catalog/services/${serviceId}/characteristics`, 'POST', {
+    characteristicsSpecs: specs,
+  })
+}
+
+/** DELETE /v1/catalog/services/{id}/characteristics — removes characteristic specs from a service, expects 204 No Content. */
+export async function removeServiceCharacteristics(serviceId: string, ids: string[]): Promise<void> {
+  // `ids` must be CharacteristicSpecificationDetailResponse.id (the specification's own UUID),
+  // NOT spec.characteristic.id (the standalone characteristic UUID). The backend validates
+  // by specification id — sending the characteristic id causes "UUID not associated with
+  // this service" errors.
+  return apiMutate<void>(`/v1/catalog/services/${serviceId}/characteristics`, 'DELETE', {
+    characteristics: ids,
+  })
+}

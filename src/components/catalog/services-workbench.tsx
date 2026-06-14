@@ -93,7 +93,7 @@ function ServiceItem({
                 No items defined for this service yet.
               </p>
             ) : (
-              <CharCards specs={svc.characteristics} />
+              <CharCards serviceId={svc.id} specs={svc.characteristics} />
             )}
           </div>
         </div>
