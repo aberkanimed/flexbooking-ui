@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { getActiveSink } from './sink'
+import { redact } from './redact'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -55,7 +56,7 @@ function emit(
     level,
     event,
     message,
-    ...(context !== undefined ? { context } : {}),
+    ...(context !== undefined ? { context: redact(context) } : {}),
   }
 
   getActiveSink().write(record)
