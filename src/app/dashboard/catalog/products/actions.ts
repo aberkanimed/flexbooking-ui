@@ -8,6 +8,7 @@ import {
   deleteProduct,
   type ProductRequest,
 } from "@/lib/api/catalog"
+import { instrumentAction } from "@/lib/log"
 
 export interface ActionState {
   errors: string[]
@@ -30,47 +31,53 @@ function validateFields(formData: FormData): {
 }
 
 /** Create or update a product. Pass `id` for update, omit for create. */
-export async function saveProductAction(
-  id: string | undefined,
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const { data, fieldErrors } = validateFields(formData)
+export const saveProductAction = instrumentAction(
+  "saveProduct",
+  async (
+    id: string | undefined,
+    _prev: ActionState,
+    formData: FormData,
+  ): Promise<ActionState> => {
+    const { data, fieldErrors } = validateFields(formData)
 
-  if (fieldErrors && Object.keys(fieldErrors).length > 0) {
-    return { errors: [], fieldErrors }
-  }
-
-  try {
-    if (id) {
-      await updateProduct(id, data)
-      revalidatePath(`/dashboard/catalog/products/${id}`)
-      revalidatePath("/dashboard/catalog/products")
-    } else {
-      await createProduct(data)
-      revalidatePath("/dashboard/catalog/products")
+    if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+      return { errors: [], fieldErrors }
     }
-    return { errors: [] }
-  } catch (err) {
-    const errors =
-      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
-    return { errors }
-  }
-}
+
+    try {
+      if (id) {
+        await updateProduct(id, data)
+        revalidatePath(`/dashboard/catalog/products/${id}`)
+        revalidatePath("/dashboard/catalog/products")
+      } else {
+        await createProduct(data)
+        revalidatePath("/dashboard/catalog/products")
+      }
+      return { errors: [] }
+    } catch (err) {
+      const errors =
+        (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+      return { errors }
+    }
+  },
+)
 
 /** Delete a product by id. Redirects to the products listing on success. */
-export async function deleteProductAction(
-  id: string,
-  _prev: ActionState,
-  _formData: FormData,
-): Promise<ActionState> {
-  try {
-    await deleteProduct(id)
-    revalidatePath("/dashboard/catalog/products")
-  } catch (err) {
-    const errors =
-      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
-    return { errors }
-  }
-  redirect("/dashboard/catalog/products")
-}
+export const deleteProductAction = instrumentAction(
+  "deleteProduct",
+  async (
+    id: string,
+    _prev: ActionState,
+    _formData: FormData,
+  ): Promise<ActionState> => {
+    try {
+      await deleteProduct(id)
+      revalidatePath("/dashboard/catalog/products")
+    } catch (err) {
+      const errors =
+        (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+      return { errors }
+    }
+    redirect("/dashboard/catalog/products")
+  },
+)
