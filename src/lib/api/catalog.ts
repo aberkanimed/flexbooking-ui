@@ -1,4 +1,4 @@
-import { getTraceId, runWithTrace } from '@/lib/log'
+import { getTraceId, runWithTrace, logger } from '@/lib/log'
 
 export interface ProductResponse {
   id: string
@@ -66,19 +66,52 @@ export interface ApiErrorResponse {
 
 const BASE_URL = process.env.CATALOG_API_URL ?? 'http://localhost:8080/api'
 
-/** GET wrapper — read-only, no body. */
+/** GET wrapper — read-only, no body. Emits one structured log event per call. */
 async function apiFetch<T>(path: string): Promise<T> {
   const traceId = await getTraceId()
-  const headers: Record<string, string> = {}
-  if (traceId !== null) headers['x-trace-id'] = traceId
+  const reqHeaders: Record<string, string> = {}
+  if (traceId !== null) reqHeaders['x-trace-id'] = traceId
 
   const run = async () => {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      cache: 'no-store',
-      headers,
-    })
-    if (!res.ok) throw new Error(`API error ${res.status}: ${path}`)
-    return (await res.json()) as T
+    const start = Date.now()
+    let status: number | undefined
+    try {
+      const res = await fetch(`${BASE_URL}${path}`, {
+        cache: 'no-store',
+        headers: reqHeaders,
+      })
+      status = res.status
+      if (!res.ok) {
+        const duration = Date.now() - start
+        logger.error('api.fetch', `GET ${path} failed`, {
+          method: 'GET',
+          path,
+          status,
+          duration,
+        })
+        throw new Error(`API error ${res.status}: ${path}`)
+      }
+      const response = (await res.json()) as T
+      const duration = Date.now() - start
+      logger.info('api.fetch', `GET ${path}`, {
+        method: 'GET',
+        path,
+        status,
+        duration,
+        response,
+      })
+      return response
+    } catch (err) {
+      if (status !== undefined) throw err // already logged above
+      const duration = Date.now() - start
+      logger.error('api.fetch', `GET ${path} network error`, {
+        method: 'GET',
+        path,
+        duration,
+        error: err instanceof Error ? err.message : String(err),
+      })
+      throw err
+    }
   }
 
   // No trace context available (no middleware header); logs will emit without traceId
@@ -89,6 +122,7 @@ async function apiFetch<T>(path: string): Promise<T> {
  * Mutation wrapper — supports POST / PUT / DELETE.
  * On non-OK responses, parses and throws ApiErrorResponse so Server Actions
  * can extract `errors: string[]` for the form banner.
+ * Emits one structured log event per call.
  */
 async function apiMutate<T>(
   path: string,
@@ -96,34 +130,80 @@ async function apiMutate<T>(
   body?: unknown,
 ): Promise<T> {
   const traceId = await getTraceId()
-  const headers: Record<string, string> = {}
-  if (traceId !== null) headers['x-trace-id'] = traceId
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  const reqHeaders: Record<string, string> = {}
+  if (traceId !== null) reqHeaders['x-trace-id'] = traceId
+  if (body !== undefined) reqHeaders['Content-Type'] = 'application/json'
 
   const run = async () => {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method,
-      cache: 'no-store',
-      headers,
-      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-    })
-    if (!res.ok) {
-      let errors: string[] = [`Request failed with status ${res.status}`]
-      try {
-        const errBody: ApiErrorResponse = await res.json()
-        if (Array.isArray(errBody.errors) && errBody.errors.length > 0) {
-          errors = errBody.errors
+    const start = Date.now()
+    let status: number | undefined
+    try {
+      const res = await fetch(`${BASE_URL}${path}`, {
+        method,
+        cache: 'no-store',
+        headers: reqHeaders,
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      })
+      status = res.status
+      if (!res.ok) {
+        let errors: string[] = [`Request failed with status ${res.status}`]
+        let errBody: ApiErrorResponse | undefined
+        try {
+          errBody = await res.json()
+          if (Array.isArray(errBody?.errors) && errBody.errors.length > 0) {
+            errors = errBody.errors
+          }
+        } catch {
+          // body was not JSON; keep the default message
         }
-      } catch {
-        // body was not JSON; keep the default message
+        const duration = Date.now() - start
+        logger.error('api.mutate', `${method} ${path} failed`, {
+          method,
+          path,
+          payload: body,
+          status,
+          duration,
+          error: errors.join('; '),
+        })
+        const err = new Error(errors.join('; ')) as Error & { errors: string[] }
+        err.errors = errors
+        throw err
       }
-      const err = new Error(errors.join('; ')) as Error & { errors: string[] }
-      err.errors = errors
+      // 204 No Content — nothing to parse
+      if (res.status === 204) {
+        const duration = Date.now() - start
+        logger.info('api.mutate', `${method} ${path}`, {
+          method,
+          path,
+          payload: body,
+          status,
+          duration,
+        })
+        return undefined as T
+      }
+      const response = (await res.json()) as T
+      const duration = Date.now() - start
+      logger.info('api.mutate', `${method} ${path}`, {
+        method,
+        path,
+        payload: body,
+        status,
+        duration,
+        response,
+      })
+      return response
+    } catch (err) {
+      if (status !== undefined) throw err // already logged above
+      const duration = Date.now() - start
+      logger.error('api.mutate', `${method} ${path} network error`, {
+        method,
+        path,
+        payload: body,
+        duration,
+        error: err instanceof Error ? err.message : String(err),
+      })
       throw err
     }
-    // 204 No Content — nothing to parse
-    if (res.status === 204) return undefined as T
-    return (await res.json()) as T
   }
 
   // No trace context available (no middleware header); logs will emit without traceId

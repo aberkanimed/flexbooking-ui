@@ -7,6 +7,7 @@ import {
   deleteCharacteristic,
   type CharacteristicRequest,
 } from "@/lib/api/catalog"
+import { instrumentAction } from "@/lib/log"
 
 export interface ActionState {
   errors: string[]
@@ -38,45 +39,51 @@ function validateFields(formData: FormData): {
 }
 
 /** Create or update a characteristic. Pass `id` for update, omit for create. */
-export async function saveCharacteristicAction(
-  id: string | undefined,
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const { data, fieldErrors } = validateFields(formData)
+export const saveCharacteristicAction = instrumentAction(
+  "saveCharacteristic",
+  async (
+    id: string | undefined,
+    _prev: ActionState,
+    formData: FormData,
+  ): Promise<ActionState> => {
+    const { data, fieldErrors } = validateFields(formData)
 
-  if (fieldErrors && Object.keys(fieldErrors).length > 0) {
-    return { errors: [], fieldErrors }
-  }
-
-  try {
-    if (id) {
-      await updateCharacteristic(id, data)
-    } else {
-      await createCharacteristic(data)
+    if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+      return { errors: [], fieldErrors }
     }
-    revalidatePath("/dashboard/catalog/characteristics")
-    return { errors: [] }
-  } catch (err) {
-    const errors =
-      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
-    return { errors }
-  }
-}
+
+    try {
+      if (id) {
+        await updateCharacteristic(id, data)
+      } else {
+        await createCharacteristic(data)
+      }
+      revalidatePath("/dashboard/catalog/characteristics")
+      return { errors: [] }
+    } catch (err) {
+      const errors =
+        (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+      return { errors }
+    }
+  },
+)
 
 /** Delete a characteristic by id. Stays on the listing (no redirect). */
-export async function deleteCharacteristicAction(
-  id: string,
-  _prev: ActionState,
-  _formData: FormData,
-): Promise<ActionState> {
-  try {
-    await deleteCharacteristic(id)
-    revalidatePath("/dashboard/catalog/characteristics")
-    return { errors: [] }
-  } catch (err) {
-    const errors =
-      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
-    return { errors }
-  }
-}
+export const deleteCharacteristicAction = instrumentAction(
+  "deleteCharacteristic",
+  async (
+    id: string,
+    _prev: ActionState,
+    _formData: FormData,
+  ): Promise<ActionState> => {
+    try {
+      await deleteCharacteristic(id)
+      revalidatePath("/dashboard/catalog/characteristics")
+      return { errors: [] }
+    } catch (err) {
+      const errors =
+        (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+      return { errors }
+    }
+  },
+)

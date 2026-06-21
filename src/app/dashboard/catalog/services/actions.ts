@@ -12,6 +12,7 @@ import {
   type ServiceUpdateRequest,
   type CharacteristicSpecificationRequest,
 } from "@/lib/api/catalog"
+import { instrumentAction } from "@/lib/log"
 
 export interface ActionState {
   errors: string[]
@@ -53,40 +54,43 @@ function validateFields(formData: FormData): {
 }
 
 /** Create or update a service. Pass `id` for update, omit for create. */
-export async function saveServiceAction(
-  id: string | undefined,
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const { name, description, active, basePrice, productId, fieldErrors } =
-    validateFields(formData)
+export const saveServiceAction = instrumentAction(
+  "saveService",
+  async (
+    id: string | undefined,
+    _prev: ActionState,
+    formData: FormData,
+  ): Promise<ActionState> => {
+    const { name, description, active, basePrice, productId, fieldErrors } =
+      validateFields(formData)
 
-  if (!id && !productId) {
-    fieldErrors.productId = "Choose a product."
-  }
-
-  if (fieldErrors && Object.keys(fieldErrors).length > 0) {
-    return { errors: [], fieldErrors }
-  }
-
-  try {
-    if (id) {
-      const data: ServiceUpdateRequest = { name, description, active, basePrice }
-      await updateService(id, data)
-      revalidatePath(`/dashboard/catalog/services/${id}`)
-      revalidatePath("/dashboard/catalog/services")
-    } else {
-      const data: ServiceRequest = { name, description, active, basePrice, productId }
-      await createService(data)
-      revalidatePath("/dashboard/catalog/services")
+    if (!id && !productId) {
+      fieldErrors.productId = "Choose a product."
     }
-    return { errors: [] }
-  } catch (err) {
-    const errors =
-      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
-    return { errors }
-  }
-}
+
+    if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+      return { errors: [], fieldErrors }
+    }
+
+    try {
+      if (id) {
+        const data: ServiceUpdateRequest = { name, description, active, basePrice }
+        await updateService(id, data)
+        revalidatePath(`/dashboard/catalog/services/${id}`)
+        revalidatePath("/dashboard/catalog/services")
+      } else {
+        const data: ServiceRequest = { name, description, active, basePrice, productId }
+        await createService(data)
+        revalidatePath("/dashboard/catalog/services")
+      }
+      return { errors: [] }
+    } catch (err) {
+      const errors =
+        (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+      return { errors }
+    }
+  },
+)
 
 export interface SpecActionState {
   errors: string[]
@@ -101,11 +105,13 @@ export interface SpecActionState {
 }
 
 /** Attach a characteristic specification to a service. */
-export async function addSpecAction(
-  serviceId: string,
-  _prev: SpecActionState,
-  formData: FormData,
-): Promise<SpecActionState> {
+export const addSpecAction = instrumentAction(
+  "addSpec",
+  async (
+    serviceId: string,
+    _prev: SpecActionState,
+    formData: FormData,
+  ): Promise<SpecActionState> => {
   const characteristicId = (formData.get("characteristicId") as string | null)?.trim() ?? ""
   const configurable = formData.get("configurable") === "on"
   const active = formData.get("active") === "on"
@@ -201,7 +207,8 @@ export async function addSpecAction(
       (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
     return { errors }
   }
-}
+  },
+)
 
 /**
  * Remove an attached characteristic specification from a service.
@@ -210,36 +217,42 @@ export async function addSpecAction(
  * The backend validates by specification id — sending the characteristic id causes a
  * "UUID not associated with this service" error.
  */
-export async function removeSpecAction(
-  serviceId: string,
-  specId: string,
-  _prev: ActionState,
-  _formData: FormData,
-): Promise<ActionState> {
-  try {
-    await removeServiceCharacteristics(serviceId, [specId])
-    revalidatePath(`/dashboard/catalog/services/${serviceId}`)
-    return { errors: [] }
-  } catch (err) {
-    const errors =
-      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
-    return { errors }
-  }
-}
+export const removeSpecAction = instrumentAction(
+  "removeSpec",
+  async (
+    serviceId: string,
+    specId: string,
+    _prev: ActionState,
+    _formData: FormData,
+  ): Promise<ActionState> => {
+    try {
+      await removeServiceCharacteristics(serviceId, [specId])
+      revalidatePath(`/dashboard/catalog/services/${serviceId}`)
+      return { errors: [] }
+    } catch (err) {
+      const errors =
+        (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+      return { errors }
+    }
+  },
+)
 
 /** Delete a service by id. Redirects to the services listing on success. */
-export async function deleteServiceAction(
-  id: string,
-  _prev: ActionState,
-  _formData: FormData,
-): Promise<ActionState> {
-  try {
-    await deleteService(id)
-    revalidatePath("/dashboard/catalog/services")
-  } catch (err) {
-    const errors =
-      (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
-    return { errors }
-  }
-  redirect("/dashboard/catalog/services")
-}
+export const deleteServiceAction = instrumentAction(
+  "deleteService",
+  async (
+    id: string,
+    _prev: ActionState,
+    _formData: FormData,
+  ): Promise<ActionState> => {
+    try {
+      await deleteService(id)
+      revalidatePath("/dashboard/catalog/services")
+    } catch (err) {
+      const errors =
+        (err as { errors?: string[] }).errors ?? [(err as Error).message ?? "An error occurred."]
+      return { errors }
+    }
+    redirect("/dashboard/catalog/services")
+  },
+)
