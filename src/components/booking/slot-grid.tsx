@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import type { AvailableSlotResponse } from "@/lib/api/availability"
+import type { AvailableSlotResponse } from "@/lib/api/availability-types"
 
 interface SlotGridProps {
   slots: AvailableSlotResponse[]
@@ -10,7 +10,13 @@ interface SlotGridProps {
 }
 
 export function SlotGrid({ slots, selectedSlot, onSelect }: SlotGridProps) {
-  if (slots.length === 0) return null
+  if (slots.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No time slots are available for this date. Please choose another day.
+      </p>
+    )
+  }
 
   return (
     <div>
