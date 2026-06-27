@@ -1,58 +1,32 @@
 "use client"
 
 import { useReducer } from "react"
-import {
-  CalendarDays,
-  User,
-  Layers,
-  SlidersHorizontal,
-  ClipboardCheck,
-  CheckCircle,
-} from "lucide-react"
-import type { BookingState, BookingAction, StepConfig } from "@/lib/booking/types"
+import type { Dispatch } from "react"
+import type { BookingState, BookingAction } from "@/lib/booking/types"
 import { BookingTopBar } from "@/components/booking/booking-top-bar"
 import { BookingFooter } from "@/components/booking/booking-footer"
+import { DateTimeStep } from "@/components/booking/steps/date-time-step"
+import { CustomerStep } from "@/components/booking/steps/customer-step"
+import { ServiceStep } from "@/components/booking/steps/service-step"
+import { ItemsStep } from "@/components/booking/steps/items-step"
+import { ReviewStep } from "@/components/booking/steps/review-step"
+import { ConfirmationStep } from "@/components/booking/steps/confirmation-step"
 
-const STEPS: StepConfig[] = [
-  {
-    eyebrow: "When",
-    title: "Pick a date and time",
-    help: "Choose the date and time slot that works best for you.",
-    icon: CalendarDays,
-  },
-  {
-    eyebrow: "Who",
-    title: "Your details",
-    help: "Let us know who we'll be serving.",
-    icon: User,
-  },
-  {
-    eyebrow: "What",
-    title: "Choose a service",
-    help: "Select the service you'd like to book.",
-    icon: Layers,
-  },
-  {
-    eyebrow: "Configure",
-    title: "Customize your service",
-    help: "Tailor the service to your needs.",
-    icon: SlidersHorizontal,
-  },
-  {
-    eyebrow: "Review",
-    title: "Check your booking",
-    help: "Review the details before confirming.",
-    icon: ClipboardCheck,
-  },
-  {
-    eyebrow: "Done",
-    title: "Booking confirmed",
-    help: "Your booking has been submitted.",
-    icon: CheckCircle,
-  },
+type StepComponentType = React.ComponentType<{
+  state: BookingState
+  dispatch: Dispatch<BookingAction>
+}>
+
+const STEP_COMPONENTS: StepComponentType[] = [
+  DateTimeStep,
+  CustomerStep,
+  ServiceStep,
+  ItemsStep,
+  ReviewStep,
+  ConfirmationStep,
 ]
 
-const TOTAL_STEPS = STEPS.length
+const TOTAL_STEPS = STEP_COMPONENTS.length
 
 const initialState: BookingState = {
   currentStep: 1,
@@ -105,9 +79,8 @@ export function BookingShell() {
   const [state, dispatch] = useReducer(bookingReducer, initialState)
 
   const { currentStep } = state
-  const step = STEPS[currentStep - 1]
-  const StepIcon = step.icon
   const isLastStep = currentStep === TOTAL_STEPS
+  const ActiveStep = STEP_COMPONENTS[currentStep - 1]
 
   return (
     <div className="flex flex-1 flex-col min-h-dvh">
@@ -119,28 +92,7 @@ export function BookingShell() {
           key={currentStep}
           className="mx-auto max-w-[660px] px-4 py-8 animate-step-in"
         >
-          {/* Placeholder panel */}
-          <div className="flex flex-col items-center gap-6 text-center">
-            <div className="flex size-[50px] items-center justify-center rounded-[15px] bg-primary-soft">
-              <StepIcon className="size-6 text-primary" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.13em] text-primary">
-                {step.eyebrow}
-              </p>
-              <h2 className="font-heading font-bold text-[26px] sm:text-[31px] leading-[1.08] tracking-[-0.025em]">
-                {step.title}
-              </h2>
-              <p className="text-[14.5px] text-muted-foreground leading-relaxed mt-1">
-                {step.help}
-              </p>
-            </div>
-            <div className="w-full rounded-3xl bg-card ring-1 ring-foreground/10 p-8">
-              <p className="text-sm text-muted-foreground">
-                Step content coming soon
-              </p>
-            </div>
-          </div>
+          <ActiveStep state={state} dispatch={dispatch} />
         </div>
       </main>
 
