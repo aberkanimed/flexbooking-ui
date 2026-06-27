@@ -15,7 +15,7 @@ export function BookingTopBar({ currentStep, totalSteps }: BookingTopBarProps) {
         {/* Logo mark + business name */}
         <div className="flex items-center gap-2.5">
           <div className="flex size-[27px] shrink-0 items-center justify-center rounded-[6px] bg-primary">
-            <BookOpen className="size-[14px] stroke-white stroke-[2px]" />
+            <BookOpen className="size-[14px] text-primary-foreground stroke-[2px]" />
           </div>
           <span className="font-heading font-bold text-[15px] leading-none">
             FlexBooking
