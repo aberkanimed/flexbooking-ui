@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { Search, Bell, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { FlexBookingLogoMark } from "@/components/ui/flex-booking-logo"
 
 const NAV = [
   { label: "Products", href: "/dashboard/catalog/products" },
@@ -14,17 +15,6 @@ const NAV = [
   { label: "Customers", href: "/dashboard/customers", disabled: true },
 ]
 
-function FlexBookingLogo() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-      <rect x="2" y="2" width="96" height="96" rx="26" fill="var(--primary)" />
-      <rect x="30" y="26" width="11" height="48" rx="5.5" fill="#fff" />
-      <rect x="30" y="26" width="40" height="11" rx="5.5" fill="#fff" />
-      <rect x="30" y="45" width="25" height="11" rx="5.5" fill="#fff" />
-      <rect x="61" y="45" width="11" height="11" rx="3.5" fill="rgba(255,255,255,.55)" />
-    </svg>
-  )
-}
 
 export function TopHeader() {
   const pathname = usePathname()
@@ -41,7 +31,7 @@ export function TopHeader() {
       <div className="flex h-[60px] items-center gap-3 px-4 lg:h-[68px] lg:gap-5 lg:px-8">
         {/* Logo + wordmark */}
         <div className="flex shrink-0 items-center gap-2.5">
-          <FlexBookingLogo />
+          <FlexBookingLogoMark size={32} />
           {/*
             - Mobile (<sm):  wordmark visible (no nav in topbar, it's at the bottom)
             - Tablet (smâ€“lg): wordmark hidden (nav tabs need the space)
