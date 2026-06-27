@@ -69,9 +69,8 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
   }
 }
 
-function canAdvance(_step: number, _state: BookingState): boolean {
-  // Placeholder: all steps are advanceable in this phase.
-  // Future tasks will add real gating logic per step.
+function canAdvance(step: number, state: BookingState): boolean {
+  if (step === 1) return !!state.date && !!state.slot
   return true
 }
 
