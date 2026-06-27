@@ -14,10 +14,10 @@ export function FlexBookingLogoMark({ size = 32, className }: FlexBookingLogoMar
       className={className}
     >
       <rect x="2" y="2" width="96" height="96" rx="26" fill="var(--primary)" />
-      <rect x="30" y="26" width="11" height="48" rx="5.5" fill="#fff" />
-      <rect x="30" y="26" width="40" height="11" rx="5.5" fill="#fff" />
-      <rect x="30" y="45" width="25" height="11" rx="5.5" fill="#fff" />
-      <rect x="61" y="45" width="11" height="11" rx="3.5" fill="rgba(255,255,255,.55)" />
+      <rect x="30" y="26" width="11" height="48" rx="5.5" fill="var(--color-primary-foreground)" />
+      <rect x="30" y="26" width="40" height="11" rx="5.5" fill="var(--color-primary-foreground)" />
+      <rect x="30" y="45" width="25" height="11" rx="5.5" fill="var(--color-primary-foreground)" />
+      <rect x="61" y="45" width="11" height="11" rx="3.5" fill="color-mix(in oklch, var(--color-primary-foreground) 55%, transparent)" />
     </svg>
   )
 }
