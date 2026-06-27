@@ -189,6 +189,8 @@ Base: `--radius: 0.625rem` (10px)
 | Sheet | `sheet.tsx` | Sides: `top` `right` `bottom` `left` / Compound: `Sheet` `SheetTrigger` `SheetContent` `SheetHeader` `SheetFooter` `SheetTitle` `SheetDescription` `SheetClose` |
 | AlertDialog | `alert-dialog.tsx` | Confirmation modal — Compound: `AlertDialog` `AlertDialogTrigger` `AlertDialogContent` `AlertDialogHeader` `AlertDialogFooter` `AlertDialogTitle` `AlertDialogDescription` `AlertDialogAction` `AlertDialogCancel`. Use to gate destructive actions (e.g. delete) behind a Cancel/Confirm step before calling the server action. On mobile, give the footer `flex-col sm:flex-row` and buttons `w-full sm:w-auto` — the default isn't sufficient alone (see `characteristic-card.tsx`) |
 | Select | `select.tsx` | Dropdown select — Compound: `Select` `SelectTrigger` `SelectValue` `SelectContent` `SelectItem` (base-ui, not Radix — check source for prop names). Used for the `valueType` field in `CharacteristicFormSheet` |
+| Calendar | `calendar.tsx` | Date picker built on **react-day-picker v9** (NOT base-ui/Radix — different primitive). Key props: `mode`, `selected`, `onSelect`, `disabled` (function matcher), `startMonth`/`endMonth` (nav bounds), `showOutsideDays`, `classNames`. To make it fill a card container: `classNames={{ root: "w-full" }}` + `className="p-0"`. |
+| Skeleton | `skeleton.tsx` | Loading placeholder — `animate-pulse rounded-md bg-muted`. Drop in where content is loading to avoid layout shift. |
 | FlexBookingLogoMark | `flex-booking-logo.tsx` | Shared SVG logo mark used in both the dashboard `TopHeader` and booking `BookingTopBar`. Props: `size?: number` (default `32`), `className?: string`. All SVG fills use CSS variables (`var(--primary)`, `var(--color-primary-foreground)`, `color-mix(in oklch, ...)`) — never hardcoded colors |
 
 ### Domain Components — `src/components/catalog/`
@@ -227,7 +229,8 @@ Public-facing wizard; all use `"use client"` except step files that contain only
 | BookingTopBar | `booking-top-bar.tsx` | Sticky header — 3-column CSS grid: `FlexBookingLogoMark` (left) | centered progress dots (center) | step counter (right) |
 | BookingFooter | `booking-footer.tsx` | Back (`variant="ghost"`) + Continue (`rounded-full shadow-cta h-[46px] px-6`) buttons; hidden on confirmation step |
 | StepHeading | `step-heading.tsx` | Shared centered eyebrow / h2 / help-text heading used by every step |
-| DateTimeStep | `steps/date-time-step.tsx` | "When / Pick a date and time" — `CalendarDays` icon |
+| SlotGrid | `slot-grid.tsx` | Client component. Props: `slots: AvailableSlotResponse[]`, `selectedSlot: string \| null`, `onSelect: (slotTime: string) => void`. Renders a `repeat(auto-fit, minmax(150px, 1fr))` grid of time-slot buttons; shows empty-state paragraph when `slots` is empty. Always uses native `disabled={!slot.isAvailable}` (not just CSS) for keyboard accessibility. |
+| DateTimeStep | `steps/date-time-step.tsx` | "When / Pick a date and time" — `CalendarDays` icon. Fully wired (Feature #46): fetches available dates + slots, renders `Calendar` + `SlotGrid`, skeleton loading, error states, dispatches `SET_DATE` / `SET_SLOT`. |
 | CustomerStep | `steps/customer-step.tsx` | "Who / Your details" — `User` icon |
 | ServiceStep | `steps/service-step.tsx` | "What / Choose a service" — `Layers` icon |
 | ItemsStep | `steps/items-step.tsx` | "Configure / Customize your service" — `SlidersHorizontal` icon |
@@ -258,7 +261,7 @@ BookingTopBar      (progress dots + step counter + logo mark)
 BookingFooter      (Back + Continue; hidden on confirmation step)
 ```
 
-State machine: `useReducer(bookingReducer, initialState)` inside `BookingShell`. Steps are mounted from the ordered `STEP_COMPONENTS` array; navigation uses `NEXT`/`PREV`/`GO_TO` actions. `canAdvance()` gates the Continue button (currently passes all steps; add per-step logic there). Types live in `src/lib/booking/types.ts` — `BookingState`, `BookingAction` (discriminated union), `StepConfig`.
+State machine: `useReducer(bookingReducer, initialState)` inside `BookingShell`. Steps are mounted from the ordered `STEP_COMPONENTS` array; navigation uses `NEXT`/`PREV`/`GO_TO` actions. `canAdvance()` gates the Continue button — step 1 (date/time) requires `!!state.date && !!state.slot`; other steps pass freely (add per-step logic there as they are wired). Types live in `src/lib/booking/types.ts` — `BookingState`, `BookingAction` (discriminated union), `StepConfig`.
 
 ### Catalog Page Structure
 
