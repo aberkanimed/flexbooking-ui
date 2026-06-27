@@ -11,12 +11,12 @@ export function BookingTopBar({ currentStep, totalSteps }: BookingTopBarProps) {
 
   return (
     <header className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-border/50">
-      <div className="mx-auto grid max-w-[660px] grid-cols-3 items-center px-4 py-3">
+      <div className="mx-auto grid max-w-[660px] grid-cols-3 items-center h-[60px] px-4 lg:h-[68px] lg:px-8">
         {/* col 1 — Logo mark + business name (left-aligned) */}
         <div className="flex items-center gap-2.5">
-          <FlexBookingLogoMark size={27} className="shrink-0" />
-          <span className="font-heading font-bold text-[15px] leading-none">
-            FlexBooking
+          <FlexBookingLogoMark size={32} className="shrink-0" />
+          <span className="font-heading text-[19px] font-bold tracking-[-0.02em]">
+            Flex<span className="text-primary">Booking</span>
           </span>
         </div>
 
