@@ -216,6 +216,23 @@ Base: `--radius: 0.625rem` (10px)
 | MobileDrawer | `mobile-drawer.tsx` | Sheet-based nav drawer for mobile |
 | SidebarNav | `sidebar-nav.tsx` | Grouped nav items used inside MobileDrawer |
 
+### Booking Components — `src/components/booking/`
+
+Public-facing wizard; all use `"use client"` except step files that contain only presentational markup.
+
+| Component | File | Use for |
+|-----------|------|---------|
+| BookingShell | `booking-shell.tsx` | Wizard orchestrator — `useReducer` over `BookingState`; mounts the active step from `STEP_COMPONENTS`; drives `BookingTopBar` and `BookingFooter` |
+| BookingTopBar | `booking-top-bar.tsx` | Progress dots, step counter, logo mark (`bg-primary` container + `BookOpen` icon + `text-primary-foreground`) |
+| BookingFooter | `booking-footer.tsx` | Back (`variant="ghost"`) + Continue (`rounded-full shadow-cta h-[46px] px-6`) buttons; hidden on confirmation step |
+| StepHeading | `step-heading.tsx` | Shared centered eyebrow / h2 / help-text heading used by every step |
+| DateTimeStep | `steps/date-time-step.tsx` | "When / Pick a date and time" — `CalendarDays` icon |
+| CustomerStep | `steps/customer-step.tsx` | "Who / Your details" — `User` icon |
+| ServiceStep | `steps/service-step.tsx` | "What / Choose a service" — `Layers` icon |
+| ItemsStep | `steps/items-step.tsx` | "Configure / Customize your service" — `SlidersHorizontal` icon |
+| ReviewStep | `steps/review-step.tsx` | "Review / Check your booking" — `ClipboardCheck` icon |
+| ConfirmationStep | `steps/confirmation-step.tsx` | "Done / Booking confirmed" — `CheckCircle` icon; triggers footer suppression (last step) |
+
 ---
 
 ## Layout Patterns
@@ -228,6 +245,19 @@ TopHeader          (fixed top)
        └─ content  (max-w-6xl, px-4 sm:px-6 lg:px-8, py-4 sm:py-6 lg:py-8)
 BottomNav          (fixed bottom, hidden on sm+)
 ```
+
+### Booking Shell (`src/app/book/layout.tsx` + `BookingShell`)
+
+Public-facing, no TopHeader or BottomNav. The layout root is `min-h-dvh flex flex-col bg-background`; `BookingShell` fills the flex column:
+
+```
+BookingTopBar      (progress dots + step counter + logo mark)
+  └─ main          (flex-1, overflow-y-auto)
+       └─ step     (mx-auto max-w-[660px] px-4 py-8 animate-step-in — keyed on currentStep)
+BookingFooter      (Back + Continue; hidden on confirmation step)
+```
+
+State machine: `useReducer(bookingReducer, initialState)` inside `BookingShell`. Steps are mounted from the ordered `STEP_COMPONENTS` array; navigation uses `NEXT`/`PREV`/`GO_TO` actions. `canAdvance()` gates the Continue button (currently passes all steps; add per-step logic there). Types live in `src/lib/booking/types.ts` — `BookingState`, `BookingAction` (discriminated union), `StepConfig`.
 
 ### Catalog Page Structure
 
@@ -326,6 +356,7 @@ FlexBooking copy is sparse, plain, and operator-facing. Follow these rules on ev
 - **Icons**: `lucide-react` only — no other icon libraries
 - **Font classes**: use `font-heading` / `font-sans` — never reference font names directly
 - **New Tailwind utilities**: define in `globals.css` with `@utility`, not in a config file
+- **Step entry animation**: apply `animate-step-in` (defined in `globals.css` as `@utility`) to the step wrapper keyed on `currentStep`; it fades + translates up 10px over 0.25s with a `prefers-reduced-motion` guard that disables it
 
 ---
 
