@@ -6,7 +6,8 @@ import type { BookingState, BookingAction } from "@/lib/booking/types"
 import type { AvailableSlotResponse } from "@/lib/api/availability-types"
 import { AVAILABILITY_WINDOW_DAYS } from "@/lib/api/availability-types"
 import { StepHeading } from "@/components/booking/step-heading"
-import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
+import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
 import { SlotGrid } from "@/components/booking/slot-grid"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -152,6 +153,14 @@ export function DateTimeStep({ state, dispatch }: DateTimeStepProps) {
               classNames={{
                 root: "w-full",
                 day: "group/day relative h-(--cell-size) w-full rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius) [&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius)",
+              }}
+              components={{
+                DayButton: ({ className, ...props }) => (
+                  <CalendarDayButton
+                    className={cn("h-(--cell-size) w-full", className)}
+                    {...props}
+                  />
+                ),
               }}
             />
           )}

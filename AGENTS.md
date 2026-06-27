@@ -44,8 +44,8 @@ are **not** stamped unless you manually wrap them with `runWithTrace`. Server Ac
 covered by `instrumentAction` (Feature #32, not yet shipped). Use `getTraceId()` (async) when
 you only need the id string itself; use `runWithTrace` when you need the logger to stamp it.
 
-**`Calendar` is react-day-picker v9 — not base-ui/Radix**
-`src/components/ui/calendar.tsx` wraps **react-day-picker v9**, which has its own primitive API
+**`Calendar` is react-day-picker v10 — not base-ui/Radix**
+`src/components/ui/calendar.tsx` wraps **react-day-picker v10**, which has its own primitive API
 distinct from both base-ui and Radix. Check the source before using any prop. To fill a card
 container with the calendar, pass `classNames={{ root: "w-full" }}` and `className="p-0"` — the
 component does not fill its container by default.
