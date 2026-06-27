@@ -148,8 +148,11 @@ export function DateTimeStep({ state, dispatch }: DateTimeStepProps) {
               startMonth={today}
               endMonth={maxDate}
               showOutsideDays={false}
-              className="p-0"
-              classNames={{ root: "w-full" }}
+              className="p-0 bg-transparent"
+              classNames={{
+                root: "w-full",
+                day: "group/day relative h-(--cell-size) w-full rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius) [&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius)",
+              }}
             />
           )}
         </div>
