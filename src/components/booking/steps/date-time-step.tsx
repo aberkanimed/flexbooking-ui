@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, type Dispatch } from "react"
+import { useState, useEffect, useMemo, useCallback, type Dispatch } from "react"
 import { addDays } from "date-fns"
 import type { BookingState, BookingAction } from "@/lib/booking/types"
 import type { AvailableSlotResponse } from "@/lib/api/availability-types"
@@ -9,7 +9,6 @@ import { StepHeading } from "@/components/booking/step-heading"
 import { Calendar } from "@/components/ui/calendar"
 import { SlotGrid } from "@/components/booking/slot-grid"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 
 interface DateTimeStepProps {
   state: BookingState
@@ -93,15 +92,23 @@ export function DateTimeStep({ state, dispatch }: DateTimeStepProps) {
   // Derive display state
   const datesLoading = datesFetch === null
   const datesError = datesFetch?.error ?? false
-  const availableDates = datesFetch?.dates ?? []
-  const availableDateSet = new Set(availableDates)
+
+  const availableDateSet = useMemo(
+    () => new Set(datesFetch?.dates ?? []),
+    [datesFetch]
+  )
 
   const slotsLoading = !!state.date && slotsFetch?.forDate !== state.date
   const slotsError = !slotsLoading && (slotsFetch?.error ?? false)
   const slots = slotsLoading ? [] : (slotsFetch?.slots ?? [])
 
-  const today = new Date()
-  const maxDate = addDays(today, AVAILABILITY_WINDOW_DAYS)
+  const today = useMemo(() => new Date(), [])
+  const maxDate = useMemo(() => addDays(today, AVAILABILITY_WINDOW_DAYS), [today])
+
+  const isDisabled = useCallback(
+    (date: Date) => !availableDateSet.has(toIso(date)),
+    [availableDateSet]
+  )
 
   return (
     <>
@@ -111,48 +118,49 @@ export function DateTimeStep({ state, dispatch }: DateTimeStepProps) {
         help="Choose a day that works for you and a preferred time window."
       />
 
-      <div className={cn(
-        "bg-card ring-1 ring-foreground/10 rounded-3xl p-5 w-full max-w-[540px] mx-auto shadow-card",
-        "flex flex-col gap-6"
-      )}>
-        {/* Calendar section */}
-        {datesLoading ? (
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-7 w-40 mx-auto" />
-            <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: 35 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-square rounded-md" />
-              ))}
+      <div className="w-full max-w-[540px] mx-auto flex flex-col gap-[22px]">
+        {/* Calendar card */}
+        <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
+          {datesLoading ? (
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-7 w-40 mx-auto" />
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 35 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square rounded-md" />
+                ))}
+              </div>
             </div>
-          </div>
-        ) : datesError ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Unable to load available dates. Please try again.
-          </p>
-        ) : (
-          <Calendar
-            mode="single"
-            selected={state.date ? parseLocalDate(state.date) : undefined}
-            onSelect={(d) => {
-              if (!d) return
-              const iso = toIso(d)
-              dispatch({ type: "SET_DATE", date: iso })
-              dispatch({ type: "SET_SLOT", slot: null })
-            }}
-            disabled={(date) => !availableDateSet.has(toIso(date))}
-            startMonth={today}
-            endMonth={maxDate}
-            showOutsideDays={false}
-          />
-        )}
+          ) : datesError ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Unable to load available dates. Please try again.
+            </p>
+          ) : (
+            <Calendar
+              mode="single"
+              selected={state.date ? parseLocalDate(state.date) : undefined}
+              onSelect={(d) => {
+                if (!d) return
+                const iso = toIso(d)
+                dispatch({ type: "SET_DATE", date: iso })
+                dispatch({ type: "SET_SLOT", slot: null })
+              }}
+              disabled={isDisabled}
+              startMonth={today}
+              endMonth={maxDate}
+              showOutsideDays={false}
+              className="p-0"
+              classNames={{ root: "w-full" }}
+            />
+          )}
+        </div>
 
-        {/* Slot section */}
+        {/* Slots section — separate from the calendar card */}
         {state.date && (
-          <>
+          <div>
             {slotsLoading ? (
               <div className="flex flex-col gap-3">
                 <Skeleton className="h-3.5 w-36" />
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] gap-2.5">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <Skeleton key={i} className="h-[62px] rounded-xl" />
                   ))}
@@ -169,7 +177,7 @@ export function DateTimeStep({ state, dispatch }: DateTimeStepProps) {
                 onSelect={(slotTime) => dispatch({ type: "SET_SLOT", slot: slotTime })}
               />
             )}
-          </>
+          </div>
         )}
       </div>
     </>

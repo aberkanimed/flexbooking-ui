@@ -35,7 +35,6 @@ export async function apiFetch<T>(path: string): Promise<T> {
         path,
         status,
         duration,
-        response,
       })
       return response
     } catch (err) {
