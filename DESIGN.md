@@ -189,6 +189,7 @@ Base: `--radius: 0.625rem` (10px)
 | Sheet | `sheet.tsx` | Sides: `top` `right` `bottom` `left` / Compound: `Sheet` `SheetTrigger` `SheetContent` `SheetHeader` `SheetFooter` `SheetTitle` `SheetDescription` `SheetClose` |
 | AlertDialog | `alert-dialog.tsx` | Confirmation modal — Compound: `AlertDialog` `AlertDialogTrigger` `AlertDialogContent` `AlertDialogHeader` `AlertDialogFooter` `AlertDialogTitle` `AlertDialogDescription` `AlertDialogAction` `AlertDialogCancel`. Use to gate destructive actions (e.g. delete) behind a Cancel/Confirm step before calling the server action. On mobile, give the footer `flex-col sm:flex-row` and buttons `w-full sm:w-auto` — the default isn't sufficient alone (see `characteristic-card.tsx`) |
 | Select | `select.tsx` | Dropdown select — Compound: `Select` `SelectTrigger` `SelectValue` `SelectContent` `SelectItem` (base-ui, not Radix — check source for prop names). Used for the `valueType` field in `CharacteristicFormSheet` |
+| FlexBookingLogoMark | `flex-booking-logo.tsx` | Shared SVG logo mark used in both the dashboard `TopHeader` and booking `BookingTopBar`. Props: `size?: number` (default `32`), `className?: string`. All SVG fills use CSS variables (`var(--primary)`, `var(--color-primary-foreground)`, `color-mix(in oklch, ...)`) — never hardcoded colors |
 
 ### Domain Components — `src/components/catalog/`
 
@@ -211,7 +212,7 @@ Base: `--radius: 0.625rem` (10px)
 
 | Component | File | Use for |
 |-----------|------|---------|
-| TopHeader | `top-header.tsx` | App header — logo, nav tabs, search, notifications, avatar |
+| TopHeader | `top-header.tsx` | App header — logo (`FlexBookingLogoMark`), nav tabs, search, notifications, avatar |
 | BottomNav | `bottom-nav.tsx` | Mobile-only tab bar (hidden on sm+); links: Products, Services, Items — only entries with shipped pages. Note: the "Items" label is UI copy for the `/dashboard/catalog/characteristics` route — the underlying entity, route, and component names remain "characteristic(s)" |
 | MobileDrawer | `mobile-drawer.tsx` | Sheet-based nav drawer for mobile |
 | SidebarNav | `sidebar-nav.tsx` | Grouped nav items used inside MobileDrawer |
@@ -223,7 +224,7 @@ Public-facing wizard; all use `"use client"` except step files that contain only
 | Component | File | Use for |
 |-----------|------|---------|
 | BookingShell | `booking-shell.tsx` | Wizard orchestrator — `useReducer` over `BookingState`; mounts the active step from `STEP_COMPONENTS`; drives `BookingTopBar` and `BookingFooter` |
-| BookingTopBar | `booking-top-bar.tsx` | Progress dots, step counter, logo mark (`bg-primary` container + `BookOpen` icon + `text-primary-foreground`) |
+| BookingTopBar | `booking-top-bar.tsx` | Sticky header — 3-column CSS grid: `FlexBookingLogoMark` (left) | centered progress dots (center) | step counter (right) |
 | BookingFooter | `booking-footer.tsx` | Back (`variant="ghost"`) + Continue (`rounded-full shadow-cta h-[46px] px-6`) buttons; hidden on confirmation step |
 | StepHeading | `step-heading.tsx` | Shared centered eyebrow / h2 / help-text heading used by every step |
 | DateTimeStep | `steps/date-time-step.tsx` | "When / Pick a date and time" — `CalendarDays` icon |
