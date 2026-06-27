@@ -137,7 +137,7 @@ export function DateTimeStep({ state, dispatch }: DateTimeStepProps) {
               if (!d) return
               const iso = toIso(d)
               dispatch({ type: "SET_DATE", date: iso })
-              dispatch({ type: "SET_SLOT", slot: "" })
+              dispatch({ type: "SET_SLOT", slot: null })
             }}
             disabled={(date) => !availableDateSet.has(toIso(date))}
             startMonth={today}

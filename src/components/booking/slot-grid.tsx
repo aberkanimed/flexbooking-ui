@@ -28,7 +28,8 @@ export function SlotGrid({ slots, selectedSlot, onSelect }: SlotGridProps) {
           <button
             key={slot.slotTime}
             type="button"
-            onClick={() => slot.isAvailable && onSelect(slot.slotTime)}
+            disabled={!slot.isAvailable}
+            onClick={() => onSelect(slot.slotTime)}
             className={cn(
               "bg-card ring-1 ring-foreground/10 rounded-xl p-3 flex flex-col gap-0.5 text-left cursor-pointer transition-all duration-150",
               selectedSlot === slot.slotTime && "ring-primary bg-primary-tint text-accent-foreground",

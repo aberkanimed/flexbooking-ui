@@ -1,3 +1,4 @@
+import 'server-only'
 import { getTraceId, runWithTrace, logger } from '@/lib/log'
 
 export const BASE_URL = process.env.CATALOG_API_URL ?? 'http://localhost:8080/api'
