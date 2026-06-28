@@ -11,14 +11,12 @@ description: >
 
 # gh CLI Skill
 
+## Golden rule 1 — filtering
+
 All `gh` output filtering must use the **`--jq` flag** built into the `gh` CLI.
 Never pipe `gh` output through PowerShell (`ConvertFrom-Json`, `Where-Object`,
 `Select-Object`) — this produces commands with `{ "..." }` patterns that trigger
 Claude Code's brace+quote security heuristic and are blocked.
-
----
-
-## The golden rule
 
 ```
 # NEVER — triggers security block:
@@ -27,6 +25,26 @@ gh issue list --json number,title,body | ConvertFrom-Json | Where-Object { $_.bo
 # ALWAYS — safe and cross-platform:
 gh issue list --json number,title,body --jq '.[] | select(.body | test("Depends on.*#7"))'
 ```
+
+---
+
+## Golden rule 2 — multi-line bodies
+
+Whenever a `gh` command carries a multi-line body (issue creation, issue edit, PR creation,
+PR comment, PR review), **write the body to a temp file first** using the Write tool, then
+pass it with `--body-file`. Never embed multi-line content directly in the shell command.
+This eliminates shell escaping failures and retry loops.
+
+```bash
+# Write body using the Write tool → .tmp/body.md, then:
+gh issue create  --title "..." --label feature  --body-file .tmp/body.md
+gh issue edit <N>                               --body-file .tmp/body.md
+gh pr create     --title "..." --base main      --body-file .tmp/body.md
+gh pr comment <N>                               --body-file .tmp/body.md
+gh pr review  <N> --approve                     --body-file .tmp/body.md  # or --request-changes
+```
+
+Only use inline `--body "..."` for single-line strings with no special characters.
 
 ---
 
@@ -77,14 +95,18 @@ gh pr view 12 --json number,state,body --jq '.'
 gh issue edit 7 --add-label in-progress --remove-label needs-triage
 ```
 
-### Post a PR comment
+### Post a PR comment (always use --body-file for multi-line)
 ```bash
-gh pr comment 12 --body "Finding: missing null check in catalog.ts line 42"
+# Write .tmp/comment.md first, then:
+gh pr comment 12 --body-file .tmp/comment.md
+# Single-line only:
+gh pr comment 12 --body "LGTM"
 ```
 
-### Create an issue and capture its number
+### Create an issue and capture its number (always use --body-file)
 ```bash
-ISSUE=$(gh issue create --title "My feature" --label feature --body "..." --json number --jq '.number')
+# Write .tmp/body.md first, then:
+ISSUE=$(gh issue create --title "My feature" --label feature --body-file .tmp/body.md --json number --jq '.number')
 echo "Created issue #$ISSUE"
 ```
 
@@ -110,24 +132,14 @@ If the `addSubIssue` mutation is unavailable (older GitHub), fall back to:
 
 ---
 
-## Appending to an issue body
+## Appending to an existing issue body
 
-Never use shell here-docs or echo pipes to build multi-line strings. Use a temp file via
-the Write tool, then pass it to `gh`:
-
-1. Write tool → write new content to `.tmp/issue-append.md`
-2. Bash: read current body and combine:
 ```bash
-CURRENT=$(gh issue view 7 --json body --jq '.body')
-NEW=$(Get-Content .tmp/issue-append.md -Raw)
-gh issue edit 7 --body "$CURRENT`n$NEW"
-```
-
-Or in practice, use `gh issue edit` with a here-string only if the content has no quotes.
-When content is complex (code blocks, backticks, quotes), write the full new body to a file
-and pass it with `--body-file`:
-```bash
-gh issue edit 7 --body-file .tmp/full-body.md
+# 1. Fetch the current body to a temp file
+gh issue view 7 --json body --jq '.body' > .tmp/current-body.md
+# 2. Append new content to .tmp/current-body.md using the Edit tool
+# 3. Push the combined body
+gh issue edit 7 --body-file .tmp/current-body.md
 ```
 
 ---

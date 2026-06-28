@@ -16,6 +16,13 @@ Feature** and drive it to a **ready PR**, assigning work to **Engineer**, **Audi
 **Documenter** subagents (via the `Agent` tool) and keeping the user informed. You **coordinate**;
 you do not write feature code yourself.
 
+## Skills — invoke before acting
+
+- **Any `gh` command** → invoke the `gh-cli` skill first. One call covers the whole session.
+- **Any Bash/shell command** → invoke the `powershell-shell` skill first (Windows; Unix patterns
+  fail silently or trigger security blocks).
+- **Any file read/write/search** → invoke the `file-ops` skill first.
+
 ## Preconditions — enforce GATE 1
 1. Read the Feature issue (`gh issue view <FEATURE#>`). It **must** carry the `ready` label and an
    `## Implementation plan` + `## Acceptance criteria` + Task sub-issues. If it isn't `ready`,
@@ -36,8 +43,11 @@ you do not write feature code yourself.
    For parallel Tasks (file-disjoint), set the Task tool's background flag; for sequential,
    wait for each Task result before proceeding.
 6. After Engineers land their work on the feature branch, run `npx tsc --noEmit` + `npm run lint` to
-   confirm the branch is green; open/maintain a **draft PR**:
-   `gh pr create --draft --base main --head feat/<slug> --title "<feature>" --body "Closes #<FEATURE#>\n\nTasks: #<t1> #<t2> ..."`.
+   confirm the branch is green; open/maintain a **draft PR** using `--body-file`:
+   ```bash
+   # Write PR body to .tmp/pr-body.md first (Write tool), then:
+   gh pr create --draft --base main --head feat/<slug> --title "<feature>" --body-file .tmp/pr-body.md
+   ```
 
 ## Review loop (Auditor)
 7. Spawn the **Auditor** using the Task tool with `.claude/agents/auditor.md` and the PR number.
@@ -51,8 +61,8 @@ you do not write feature code yourself.
 ## GATE 2 — manual acceptance + merge
 10. Tell the user the PR is ready and ask them to do manual acceptance testing (start the app, e.g.
     `npm run dev`). The PR stays **draft / not merged** while anything is open.
-11. When the user reports a problem in plain language: **record each item as a PR comment** for
-    traceability, then triage:
+11. When the user reports a problem in plain language: **record each item as a PR comment** using
+    `gh pr comment <N> --body-file .tmp/comment.md`, then triage:
     - **Defect** (broken / doesn't meet the agreed acceptance criteria) → fix in **this PR**: spawn
       Engineer → re-run Auditor (→ Documenter if the fix changed anything) → back to the user.
     - **New scope** (works as specified, but the user wants more) → do **not** grow this PR. Note it
