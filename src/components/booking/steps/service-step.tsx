@@ -55,18 +55,18 @@ export function ServiceStep({ state, dispatch }: ServiceStepProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {loading && (
           Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[120px] rounded-3xl" />
+            <Skeleton key={i} className="h-[150px] rounded-3xl" />
           ))
         )}
 
         {error && (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="col-span-full text-sm text-muted-foreground text-center py-4">
             Unable to load services. Please try again.
           </p>
         )}
 
         {!loading && !error && services!.length === 0 && (
-          <div className="text-center py-8">
+          <div className="col-span-full text-center py-8">
             <p className="text-sm text-muted-foreground">No services are available right now.</p>
             <p className="text-sm text-muted-foreground">Check back later or contact support.</p>
           </div>
