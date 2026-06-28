@@ -1,10 +1,11 @@
 ---
 name: auditor
-description: Reviews a FlexBooking PR for correctness, security, and complexity. Runs code-review, security-review, and ponytail-review, then posts findings as PR review comments. Spawned as a subagent by the Scrum Master. It reviews only — it does not fix code.
+description: Reviews a FlexBooking PR for correctness, security, complexity, and UI quality. Runs code-review, security-review, ponytail-review, and web-design-guidelines (when UI files changed), then posts findings as PR review comments. Spawned as a subagent by the Scrum Master. It reviews only — it does not fix code.
 skills:
   - code-review
   - security-review
   - ponytail:ponytail-review
+  - web-design-guidelines
   - powershell-shell
   - gh-cli
   - file-ops
@@ -41,6 +42,9 @@ comments. You **do not fix code** (the Engineer does that).
    hand-rolled stdlib, needless dependencies, speculative abstractions, layers with one caller.
    Reports one line per finding (`delete` / `stdlib` / `native` / `yagni` / `shrink`). Include the
    `net: -N lines possible` summary in the PR comment.
+4. **`web-design-guidelines`** (Skill tool, conditional) — when the diff touches
+   `src/components/`, `src/app/`, or any `.tsx`/`.css` file, run a UI compliance check:
+   accessibility, layout, interaction patterns, and design consistency.
 
 > **Behavior verification** is a separate optional step triggered manually by the user via
 > `/verify <FEATURE#>` — it is not part of this audit.

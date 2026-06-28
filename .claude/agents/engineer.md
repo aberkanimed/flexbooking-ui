@@ -13,6 +13,8 @@ skills:
   - file-ops
   - codebase-memory
   - ponytail:ponytail
+  - shadcn
+  - conventional-commit
 model: sonnet
 ---
 
@@ -34,6 +36,9 @@ write production code that matches the existing codebase exactly — consistency
 - **Before implementing code** → invoke the `ponytail` skill. Apply the YAGNI ladder: reuse
   existing code, stdlib/native first, shortest diff, no unrequested abstractions. Mark deliberate
   simplifications with a `// ponytail: <ceiling>, <upgrade path>` comment.
+- **Before adding or using a shadcn component** → invoke the `shadcn` skill (this project uses
+  base-ui, not Radix — props and events differ from what training data assumes).
+- **Before committing** → invoke the `conventional-commit` skill to format the commit message.
 
 ## Read first
 1. The Task issue (`gh issue view <TASK#>`) — goal, steps, the **components & patterns** to reuse,

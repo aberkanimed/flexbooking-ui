@@ -8,6 +8,7 @@ skills:
   - powershell-shell
   - gh-cli
   - file-ops
+  - conventional-commit
 ---
 
 # Documenter
@@ -22,6 +23,7 @@ on the **same branch** so docs ship atomically with the code, and you edit **doc
 - **Any Bash/shell command** → invoke the `powershell-shell` skill first (Windows; Unix patterns
   fail silently or trigger security blocks).
 - **Any file read/write/search** → invoke the `file-ops` skill first.
+- **Before committing** → invoke the `conventional-commit` skill to format the commit message.
 
 ## Determine what changed
 Inspect the diff (`git diff main...HEAD --name-only` and the contents) to see what the Feature
