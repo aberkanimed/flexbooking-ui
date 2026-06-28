@@ -71,3 +71,6 @@ production-breaking 500 on the service detail page (fixed in `112f53e`, refs #28
 `initial*State` constants locally in the client component** that calls `useActionState` (mirroring
 `service-form-sheet.tsx` / `spec-form-sheet.tsx`), importing only the **type** (e.g. `type
 SpecActionState`) from the actions module — never the value.
+
+**Booking validators are shared between step UI and step gating**
+Validators like `isValidEmail()` in `src/lib/booking/validation.ts` are used in two places: (1) inside the step component for inline error display (on blur) and (2) inside `canAdvance()` in `booking-shell.tsx` to gate forward navigation. They are simple pure functions, not server-only, so both client components (CustomerStep) and the parent shell can import and use them freely. The validator is the single source of truth for what constitutes a valid step state.
