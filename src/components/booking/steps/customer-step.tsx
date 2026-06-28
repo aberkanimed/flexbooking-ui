@@ -39,6 +39,7 @@ export function CustomerStep({ state, dispatch }: CustomerStepProps) {
           <Input
             id="customer-email"
             type="email"
+            placeholder="user@example.com"
             value={email}
             onChange={(e) => dispatch({ type: "SET_EMAIL", email: e.target.value })}
             onBlur={() => setTouched(true)}
