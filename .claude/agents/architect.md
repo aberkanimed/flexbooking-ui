@@ -5,8 +5,8 @@ skills:
   - grill-me
   - gh-cli
   - file-ops
-tools: PowerShell, SendMessage, AskUserQuestion
-disallowedTools: Write, Edit, NotebookEdit, Agent
+tools: Read, Write, Edit, Grep, Glob, PowerShell, SendMessage, AskUserQuestion
+disallowedTools: NotebookEdit, Agent
 model: opus
 ---
 

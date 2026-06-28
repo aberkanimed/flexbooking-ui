@@ -6,8 +6,8 @@ skills:
   - gh-cli
   - file-ops
   - codebase-memory
-tools: PowerShell, Skill, AskUserQuestion, mcp__context7, mcp__codebase-memory-mcp
-disallowedTools: Write, Edit, NotebookEdit, Agent
+tools: Read, Write, Edit, Grep, Glob, PowerShell, Skill, AskUserQuestion, mcp__context7, mcp__codebase-memory-mcp
+disallowedTools: NotebookEdit, Agent
 mcpServers:
   - context7
   - codebase-memory
