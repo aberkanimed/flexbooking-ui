@@ -52,10 +52,10 @@ export function ServiceStep({ state, dispatch }: ServiceStepProps) {
         help="Pick one service from the catalog."
       />
 
-      <div className="w-full max-w-[540px] mx-auto flex flex-col gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {loading && (
-          Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-[130px] rounded-3xl" />
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-[120px] rounded-3xl" />
           ))
         )}
 
@@ -82,7 +82,7 @@ export function ServiceStep({ state, dispatch }: ServiceStepProps) {
               aria-checked={selected}
               onClick={() => dispatch({ type: "SET_SERVICE", serviceId: service.id })}
               className={cn(
-                "flex flex-col gap-3.5 overflow-hidden rounded-3xl border border-border bg-card p-[18px] shadow-[var(--shadow-card)] text-left cursor-pointer transition-all duration-150 ring-2 ring-transparent focus-visible:outline-none focus-visible:ring-primary",
+                "flex flex-col gap-2.5 overflow-hidden rounded-3xl border border-border bg-card p-4 shadow-[var(--shadow-card)] text-left cursor-pointer transition-all duration-150 ring-2 ring-transparent focus-visible:outline-none focus-visible:ring-primary",
                 selected && "ring-primary bg-primary-tint border-primary-soft",
               )}
             >
@@ -102,7 +102,7 @@ export function ServiceStep({ state, dispatch }: ServiceStepProps) {
               </div>
 
               {/* Price strip */}
-              <div className="mt-auto flex items-center gap-2.5 bg-muted/50 -mx-[18px] -mb-[18px] px-[18px] py-3">
+              <div className="mt-auto flex items-center gap-2.5 bg-muted/50 -mx-4 -mb-4 px-4 py-3">
                 <div>
                   <span className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                     Base price
