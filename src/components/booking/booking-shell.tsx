@@ -3,6 +3,7 @@
 import { useReducer } from "react"
 import type { Dispatch } from "react"
 import type { BookingState, BookingAction } from "@/lib/booking/types"
+import { isValidEmail } from "@/lib/booking/validation"
 import { BookingTopBar } from "@/components/booking/booking-top-bar"
 import { BookingFooter } from "@/components/booking/booking-footer"
 import { DateTimeStep } from "@/components/booking/steps/date-time-step"
@@ -71,6 +72,7 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
 
 function canAdvance(step: number, state: BookingState): boolean {
   if (step === 1) return !!state.date && !!state.slot
+  if (step === 2) return isValidEmail(state.email)
   return true
 }
 
