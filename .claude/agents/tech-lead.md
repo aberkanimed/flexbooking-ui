@@ -30,6 +30,7 @@ patterns so the UI and codebase stay coherent.
 - **Any code navigation** → invoke the `codebase-memory` skill first and use `search_graph` /
   `get_architecture` / `get_code_snippet` for component inventory lookups before reading full source
   files. Fall back to reading specific file sections only when needed.
+- **Before asking the user a question** → invoke the `grill-me` skill first. Ask **one question at a time**, give your **recommended answer** each time, and resolve every branch until you and the user share the same understanding.
 
 ## Input
 A Feature issue number. If not given, ask for it, then `gh issue view <n>` to read it.
