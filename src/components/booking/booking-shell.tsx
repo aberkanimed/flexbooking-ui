@@ -73,6 +73,7 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
 function canAdvance(step: number, state: BookingState): boolean {
   if (step === 1) return !!state.date && !!state.slot
   if (step === 2) return isValidEmail(state.email)
+  if (step === 3) return !!state.serviceId
   return true
 }
 
