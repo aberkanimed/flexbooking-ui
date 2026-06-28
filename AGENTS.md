@@ -44,6 +44,23 @@ are **not** stamped unless you manually wrap them with `runWithTrace`. Server Ac
 covered by `instrumentAction` (Feature #32, not yet shipped). Use `getTraceId()` (async) when
 you only need the id string itself; use `runWithTrace` when you need the logger to stamp it.
 
+**`Calendar` is react-day-picker v10 — not base-ui/Radix**
+`src/components/ui/calendar.tsx` wraps **react-day-picker v10**, which has its own primitive API
+distinct from both base-ui and Radix. Check the source before using any prop. To fill a card
+container with the calendar, pass `classNames={{ root: "w-full" }}` and `className="p-0"` — the
+component does not fill its container by default.
+
+**Use native `disabled` attribute on interactive slot/option elements**
+Always set `disabled={!slot.isAvailable}` (or equivalent) directly on the button/input element —
+don't rely on only CSS opacity/pointer-events. Native `disabled` ensures keyboard users cannot tab
+to or activate unavailable options; CSS-only "disabled" leaves them reachable by keyboard.
+
+**Client-safe types split — extract a `*-types.ts` file when types must cross the server/client boundary**
+API modules guarded with `import 'server-only'` cannot be imported by `"use client"` components.
+When types or constants from such a module are needed on both sides, extract them into a separate
+`*-types.ts` file (no server imports). Both the server module and client components import from
+that file. See `src/lib/api/availability-types.ts` as the reference example.
+
 **`"use server"` modules may only export async functions — not consts/types-as-values**
 A file with `"use server"` at the top is a server-action boundary: **only `async function` exports
 survive** the client/server split. Exporting a plain `const initialState = { errors: [] }` (or any

@@ -11,7 +11,7 @@ export interface BookingState {
 
 export type BookingAction =
   | { type: "SET_DATE"; date: string }
-  | { type: "SET_SLOT"; slot: string }
+  | { type: "SET_SLOT"; slot: string | null }
   | { type: "SET_EMAIL"; email: string }
   | { type: "SET_SERVICE"; serviceId: string }
   | { type: "SET_ITEM"; key: string; value: unknown }
