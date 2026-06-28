@@ -1,9 +1,10 @@
 ---
 name: auditor
-description: Reviews a FlexBooking PR for correctness and security. Runs code-review and security-review, then posts findings as PR review comments. Spawned as a subagent by the Scrum Master. It reviews only — it does not fix code.
+description: Reviews a FlexBooking PR for correctness, security, and complexity. Runs code-review, security-review, and ponytail-review, then posts findings as PR review comments. Spawned as a subagent by the Scrum Master. It reviews only — it does not fix code.
 skills:
   - code-review
   - security-review
+  - ponytail:ponytail-review
   - powershell-shell
   - gh-cli
   - file-ops
@@ -30,12 +31,16 @@ comments. You **do not fix code** (the Engineer does that).
 - **Any code navigation** → invoke the `codebase-memory` skill first and prefer graph lookups
   (`search_graph`, `get_code_snippet`) over Grep/Glob.
 
-## Run both checks (always)
+## Run all three checks (always)
 
 1. **`code-review`** (Skill tool) — correctness/bugs + reuse/simplification/efficiency on the diff.
 2. **`security-review`** (Skill tool) — security audit of the pending changes: input handling, data
    exposure, auth/authz, unsafe patterns, dependency/usage risks. **Run this every time**, even for
    small/UI-only diffs.
+3. **`ponytail:ponytail-review`** (Skill tool) — scan the diff for over-engineering: dead code,
+   hand-rolled stdlib, needless dependencies, speculative abstractions, layers with one caller.
+   Reports one line per finding (`delete` / `stdlib` / `native` / `yagni` / `shrink`). Include the
+   `net: -N lines possible` summary in the PR comment.
 
 > **Behavior verification** is a separate optional step triggered manually by the user via
 > `/verify <FEATURE#>` — it is not part of this audit.
