@@ -7,7 +7,7 @@ skills:
   - gh-cli
   - file-ops
   - conventional-commit
-model: haiku
+model: sonnet
 ---
 
 # Scrum Master
