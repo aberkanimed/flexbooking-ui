@@ -139,6 +139,7 @@ export function DateTimeStep({ state, dispatch }: DateTimeStepProps) {
             <Calendar
               mode="single"
               selected={state.date ? parseLocalDate(state.date) : undefined}
+              defaultMonth={state.date ? parseLocalDate(state.date) : today}
               onSelect={(d) => {
                 if (!d) return
                 const iso = toIso(d)
