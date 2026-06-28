@@ -231,7 +231,7 @@ Public-facing wizard; all use `"use client"` except step files that contain only
 | StepHeading | `step-heading.tsx` | Shared centered eyebrow / h2 / help-text heading used by every step |
 | SlotGrid | `slot-grid.tsx` | Client component. Props: `slots: AvailableSlotResponse[]`, `selectedSlot: string \| null`, `onSelect: (slotTime: string) => void`. Renders a `repeat(auto-fit, minmax(150px, 1fr))` grid of time-slot buttons; shows empty-state paragraph when `slots` is empty. Always uses native `disabled={!slot.isAvailable}` (not just CSS) for keyboard accessibility. |
 | DateTimeStep | `steps/date-time-step.tsx` | "When / Pick a date and time" — `CalendarDays` icon. Fully wired (Feature #46): fetches available dates + slots, renders `Calendar` + `SlotGrid`, skeleton loading, error states, dispatches `SET_DATE` / `SET_SLOT`. |
-| CustomerStep | `steps/customer-step.tsx` | "Who / Your details" — `User` icon |
+| CustomerStep | `steps/customer-step.tsx` | "Who / Your details" — email input with inline validation (via `isValidEmail()` from `src/lib/booking/validation.ts`); error shown on blur; aria attributes for accessibility (Feature #47) |
 | ServiceStep | `steps/service-step.tsx` | "What / Choose a service" — `Layers` icon |
 | ItemsStep | `steps/items-step.tsx` | "Configure / Customize your service" — `SlidersHorizontal` icon |
 | ReviewStep | `steps/review-step.tsx` | "Review / Check your booking" — `ClipboardCheck` icon |
@@ -261,7 +261,7 @@ BookingTopBar      (progress dots + step counter + logo mark)
 BookingFooter      (Back + Continue; hidden on confirmation step)
 ```
 
-State machine: `useReducer(bookingReducer, initialState)` inside `BookingShell`. Steps are mounted from the ordered `STEP_COMPONENTS` array; navigation uses `NEXT`/`PREV`/`GO_TO` actions. `canAdvance()` gates the Continue button — step 1 (date/time) requires `!!state.date && !!state.slot`; other steps pass freely (add per-step logic there as they are wired). Types live in `src/lib/booking/types.ts` — `BookingState`, `BookingAction` (discriminated union), `StepConfig`.
+State machine: `useReducer(bookingReducer, initialState)` inside `BookingShell`. Steps are mounted from the ordered `STEP_COMPONENTS` array; navigation uses `NEXT`/`PREV`/`GO_TO` actions. `canAdvance()` in `booking-shell.tsx` gates the Continue button per step: step 1 (date/time) requires `!!state.date && !!state.slot`; step 2 (customer) requires `isValidEmail(state.email)` (via `src/lib/booking/validation.ts`); other steps pass freely (add per-step logic there as they are wired). Types live in `src/lib/booking/types.ts` — `BookingState`, `BookingAction` (discriminated union), `StepConfig`.
 
 ### Catalog Page Structure
 
@@ -329,6 +329,43 @@ re-implement this markup. It renders `active`/`inactive` with an optional `sm` s
   Label
 </Button>
 ```
+
+### Inline Form Validation (Feature #47)
+
+Pattern for client-side validators + error display on blur:
+
+```tsx
+const [touched, setTouched] = useState(false)
+const email = state.email
+const error = touched
+  ? email.trim() === ""
+    ? "Email is required"
+    : !isValidEmail(email)
+      ? "Enter a valid email"
+      : null
+  : null
+const errorId = "field-error"
+
+<div className="flex flex-col gap-1.5">
+  <Label htmlFor="field-id">Label</Label>
+  <Input
+    id="field-id"
+    type="email"
+    value={email}
+    onChange={(e) => dispatch({ type: "SET_EMAIL", email: e.target.value })}
+    onBlur={() => setTouched(true)}
+    aria-invalid={error ? true : undefined}
+    aria-describedby={error ? errorId : undefined}
+  />
+  {error && (
+    <p id={errorId} className="text-[13px] text-destructive">
+      {error}
+    </p>
+  )}
+</div>
+```
+
+Always set `aria-invalid` and `aria-describedby` for accessibility; show error text only after blur (not on every keystroke) to avoid frustrating the user.
 
 ### Sidebar Nav Item (active state)
 
