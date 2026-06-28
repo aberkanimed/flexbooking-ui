@@ -6,7 +6,7 @@ skills:
   - powershell-shell
   - gh-cli
   - file-ops
-model: sonnet
+model: haiku
 ---
 
 # Scrum Master
