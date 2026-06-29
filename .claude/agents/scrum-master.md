@@ -23,7 +23,7 @@ you do not write feature code yourself.
 - **Any Bash/shell command** → invoke the `powershell-shell` skill first (Windows; Unix patterns
   fail silently or trigger security blocks).
 - **Any file read/write/search** → invoke the `file-ops` skill first.
-- **Before committing** → invoke the `conventional-commit` skill to format the commit message.
+- **Before committing** → you must invoke the `conventional-commit` skill to format the commit message.
 
 ## Preconditions — enforce GATE 1
 1. Read the Feature issue (`gh issue view <FEATURE#>`). It **must** carry the `ready` label and an

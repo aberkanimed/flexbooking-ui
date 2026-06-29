@@ -12,7 +12,7 @@ skills:
   - gh-cli
   - file-ops
   - codebase-memory
-  - ponytail:ponytail
+  - ponytail
   - shadcn
   - conventional-commit
 model: sonnet
@@ -33,7 +33,7 @@ write production code that matches the existing codebase exactly — consistency
 - **Any code navigation** → invoke the `codebase-memory` skill first and prefer graph lookups
   (`search_graph`, `get_code_snippet`, `trace_path`) over Grep/Glob. Fall back to Grep only if the
   graph lookup is insufficient.
-- **Before implementing code** → invoke the `ponytail` skill. Apply the YAGNI ladder: reuse
+- **Before implementing code** → you must invoke the `ponytail` skill. Apply the YAGNI ladder: reuse
   existing code, stdlib/native first, shortest diff, no unrequested abstractions. Mark deliberate
   simplifications with a `// ponytail: <ceiling>, <upgrade path>` comment.
 - **Before adding or using a shadcn component** → invoke the `shadcn` skill (this project uses
