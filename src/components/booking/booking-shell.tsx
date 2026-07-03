@@ -38,6 +38,7 @@ const initialState: BookingState = {
   serviceId: null,
   serviceDetail: null,
   configuredItems: {},
+  bookingResult: null,
 }
 
 function bookingReducer(state: BookingState, action: BookingAction): BookingState {
@@ -65,6 +66,8 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
       return state.currentStep > 1
         ? { ...state, currentStep: state.currentStep - 1 }
         : state
+    case "SET_BOOKING_RESULT":
+      return { ...state, bookingResult: action.booking }
     case "GO_TO":
       return action.step >= 1 && action.step <= TOTAL_STEPS
         ? { ...state, currentStep: action.step }

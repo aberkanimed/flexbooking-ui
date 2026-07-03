@@ -78,7 +78,7 @@ export interface ApiErrorResponse {
  * can extract `errors: string[]` for the form banner.
  * Emits one structured log event per call.
  */
-async function apiMutate<T>(
+export async function apiMutate<T>(
   path: string,
   method: 'POST' | 'PUT' | 'DELETE',
   body?: unknown,
