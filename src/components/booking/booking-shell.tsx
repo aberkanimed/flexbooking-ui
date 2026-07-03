@@ -88,8 +88,9 @@ export function BookingShell() {
   const [state, dispatch] = useReducer(bookingReducer, initialState)
 
   const { currentStep } = state
-  const isLastStep = currentStep === TOTAL_STEPS
   const ActiveStep = STEP_COMPONENTS[currentStep - 1]
+  // Hide footer on Review (step 5) and Confirmation (step 6) — Review owns its own submit button
+  const hideFooter = currentStep >= TOTAL_STEPS - 1
   const estimate = state.serviceDetail
     ? computeEstimate(state.serviceDetail, state.configuredItems)
     : undefined
@@ -113,7 +114,7 @@ export function BookingShell() {
         canContinue={canAdvance(currentStep, state)}
         onBack={() => dispatch({ type: "PREV" })}
         onContinue={() => dispatch({ type: "NEXT" })}
-        hidden={isLastStep}
+        hidden={hideFooter}
         estimate={estimate}
       />
     </div>
