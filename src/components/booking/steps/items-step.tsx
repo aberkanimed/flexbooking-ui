@@ -86,20 +86,20 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
         help="Adjust the options for your chosen service."
       />
 
-      <div className="w-full max-w-[560px] mx-auto flex flex-col gap-3">
+      <div className="w-full max-w-[560px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
         {loading &&
           Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-[58px] rounded-2xl" />
           ))}
 
         {error && (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-sm text-muted-foreground text-center py-4 md:col-span-2">
             Unable to load service options. Please try again.
           </p>
         )}
 
         {!loading && !error && visibleSpecs.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-sm text-muted-foreground text-center py-4 md:col-span-2">
             No options to configure for this service.
           </p>
         )}
@@ -110,15 +110,51 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
             const name = spec.characteristic.name
             const desc = spec.characteristic.description
             const currentValue = configuredItems[spec.id]?.value
+            const cardClass =
+              "flex items-center gap-4 bg-card border border-border rounded-2xl px-[18px] py-[14px] shadow-[var(--shadow-card)]"
 
-            // range + configurable → slider
-            if (spec.range && spec.configurable) {
+            // boolean → Switch (configurable) or read-only
+            if (spec.characteristic.valueType === "BOOLEAN") {
+              const checked = currentValue === "true"
+              return (
+                <div key={spec.id} className={cardClass}>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-heading font-semibold text-[15px] text-foreground">
+                      {name}
+                    </div>
+                    {desc && (
+                      <div className="text-[12.5px] text-muted-foreground mt-0.5">
+                        {desc}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-none">
+                    {spec.configurable ? (
+                      <Switch
+                        checked={checked}
+                        onCheckedChange={(c) =>
+                          dispatch({
+                            type: "SET_ITEM",
+                            key: spec.id,
+                            value: c ? "true" : "false",
+                          })
+                        }
+                      />
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        {checked ? "Yes" : "No"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            }
+
+            // number + range → slider (configurable) or read-only
+            if (spec.characteristic.valueType === "NUMBER" && spec.range) {
               const numVal = Number(currentValue ?? spec.valueFrom ?? 0)
               return (
-                <div
-                  key={spec.id}
-                  className="flex items-center gap-4 bg-card border border-border rounded-2xl px-[18px] py-[14px] shadow-[var(--shadow-card)]"
-                >
+                <div key={spec.id} className={cardClass}>
                   <div className="flex-1 min-w-0">
                     <div className="font-heading font-semibold text-[15px] text-foreground">
                       {name}
@@ -134,27 +170,32 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                       {numFmt.format(numVal)}
                       {unitSuffix(spec.unitOfMeasure)}
                     </span>
-                    <input
-                      type="range"
-                      min={spec.valueFrom ?? 0}
-                      max={spec.valueTo ?? 100}
-                      value={numVal}
-                      onChange={(e) =>
-                        dispatch({
-                          type: "SET_ITEM",
-                          key: spec.id,
-                          value: Number(e.target.value),
-                        })
-                      }
-                      className="w-full accent-primary cursor-pointer"
-                    />
+                    {spec.configurable ? (
+                      <input
+                        type="range"
+                        min={spec.valueFrom ?? 0}
+                        max={spec.valueTo ?? 100}
+                        value={numVal}
+                        onChange={(e) =>
+                          dispatch({
+                            type: "SET_ITEM",
+                            key: spec.id,
+                            value: Number(e.target.value),
+                          })
+                        }
+                        className="w-full accent-primary cursor-pointer"
+                      />
+                    ) : null}
                   </div>
                 </div>
               )
             }
 
-            // value-set → Select (configurable) or read-only label
-            if (spec.values.length > 0) {
+            // string / value-set → Select (configurable) or read-only
+            if (
+              spec.characteristic.valueType === "STRING" ||
+              spec.values.length > 0
+            ) {
               const strVal = String(
                 currentValue ??
                   spec.values.find((v) => v.isDefault)?.value ??
@@ -162,10 +203,7 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                   "",
               )
               return (
-                <div
-                  key={spec.id}
-                  className="flex items-center gap-4 bg-card border border-border rounded-2xl px-[18px] py-[14px] shadow-[var(--shadow-card)]"
-                >
+                <div key={spec.id} className={cardClass}>
                   <div className="flex-1 min-w-0">
                     <div className="font-heading font-semibold text-[15px] text-foreground">
                       {name}
@@ -211,52 +249,9 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
               )
             }
 
-            // boolean → Switch (configurable) or read-only
-            if (spec.characteristic.valueType === "BOOLEAN") {
-              const checked = currentValue === "true"
-              return (
-                <div
-                  key={spec.id}
-                  className="flex items-center gap-4 bg-card border border-border rounded-2xl px-[18px] py-[14px] shadow-[var(--shadow-card)]"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="font-heading font-semibold text-[15px] text-foreground">
-                      {name}
-                    </div>
-                    {desc && (
-                      <div className="text-[12.5px] text-muted-foreground mt-0.5">
-                        {desc}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-none">
-                    {spec.configurable ? (
-                      <Switch
-                        checked={checked}
-                        onCheckedChange={(c) =>
-                          dispatch({
-                            type: "SET_ITEM",
-                            key: spec.id,
-                            value: c ? "true" : "false",
-                          })
-                        }
-                      />
-                    ) : (
-                      <span className="text-sm text-muted-foreground">
-                        {checked ? "Yes" : "No"}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )
-            }
-
             // non-configurable fallback: read-only display
             return (
-              <div
-                key={spec.id}
-                className="flex items-center gap-4 bg-card border border-border rounded-2xl px-[18px] py-[14px] shadow-[var(--shadow-card)]"
-              >
+              <div key={spec.id} className={cardClass}>
                 <div className="flex-1 min-w-0">
                   <div className="font-heading font-semibold text-[15px] text-foreground">
                     {name}

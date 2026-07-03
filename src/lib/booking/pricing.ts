@@ -32,7 +32,7 @@ export function seedDefaults(
       const def = spec.values.find((v) => v.isDefault) ?? spec.values[0]
       result[spec.id] = { value: def.value }
     } else {
-      // boolean or no values — default to "false" string
+      // boolean: seed as "false" so pricing starts with zero contribution
       result[spec.id] = { value: "false" }
     }
   }
@@ -54,12 +54,22 @@ export function computeEstimate(
     const name = spec.characteristic.name
     let amountCents: number
 
-    if (spec.range && spec.configurable) {
-      const item = configuredItems[spec.id]
-      const qty = item !== undefined ? Number(item.value) : (spec.valueFrom ?? 0)
+    if (!spec.configurable) {
+      // Non-configurable: operator default, always included
+      amountCents = spec.range
+        ? spec.price * (spec.valueFrom ?? 0)
+        : spec.price
+    } else if (spec.range) {
+      // Configurable range: exclude when qty is 0
+      const qty = Number(configuredItems[spec.id]?.value ?? spec.valueFrom ?? 0)
+      if (qty <= 0) continue
       amountCents = spec.price * qty
+    } else if (spec.characteristic.valueType === "BOOLEAN") {
+      // Configurable boolean: exclude when off
+      if (configuredItems[spec.id]?.value !== "true") continue
+      amountCents = spec.price
     } else {
-      // value-set, boolean, or non-configurable: flat price
+      // Configurable value-set (string): always included
       amountCents = spec.price
     }
 
@@ -80,6 +90,11 @@ export function buildConfiguredItemsPayload(
     if (!isSpecVisible(spec, configuredItems)) continue
     const item = configuredItems[spec.id]
     const value = item !== undefined ? item.value : (spec.valueFrom ?? 0)
+    // Exclude configurable items that are "not selected"
+    if (spec.configurable) {
+      if (spec.characteristic.valueType === "BOOLEAN" && value !== "true") continue
+      if (spec.range && Number(value) <= 0) continue
+    }
     const entry: { code: string; value: string | number; valueType: string; unit?: string } = {
       code: spec.code,
       value,
