@@ -227,13 +227,14 @@ Public-facing wizard; all use `"use client"` except step files that contain only
 |-----------|------|---------|
 | BookingShell | `booking-shell.tsx` | Wizard orchestrator — `useReducer` over `BookingState`; mounts the active step from `STEP_COMPONENTS`; drives `BookingTopBar` and `BookingFooter` |
 | BookingTopBar | `booking-top-bar.tsx` | Sticky header — 3-column CSS grid: `FlexBookingLogoMark` (left) | centered progress dots (center) | step counter (right) |
-| BookingFooter | `booking-footer.tsx` | Back (`variant="ghost"`) + Continue (`rounded-full shadow-cta h-[46px] px-6`) buttons; hidden on confirmation step |
+| BookingFooter | `booking-footer.tsx` | Back (`variant="ghost"`) + Continue (`rounded-full shadow-cta h-[46px] px-6`) buttons; hidden on confirmation step; collapsible estimate pill on mobile (Feature #49) |
+| BookingEstimate | `booking-estimate.tsx` (Feature #49) | Presentational panel: line items + divider + total. Props: `lineItems: { label, amountCents }[]`, `totalCents: number`. Formats prices via `usd` formatter from `src/lib/booking/pricing.ts` (divide by 100 at render edge). Used in `BookingFooter` and `ReviewStep`. |
 | StepHeading | `step-heading.tsx` | Shared centered eyebrow / h2 / help-text heading used by every step |
 | SlotGrid | `slot-grid.tsx` | Client component. Props: `slots: AvailableSlotResponse[]`, `selectedSlot: string \| null`, `onSelect: (slotTime: string) => void`. Renders a `repeat(auto-fit, minmax(150px, 1fr))` grid of time-slot buttons; shows empty-state paragraph when `slots` is empty. Always uses native `disabled={!slot.isAvailable}` (not just CSS) for keyboard accessibility. |
 | DateTimeStep | `steps/date-time-step.tsx` | "When / Pick a date and time" — `CalendarDays` icon. Fully wired (Feature #46): fetches available dates + slots, renders `Calendar` + `SlotGrid`, skeleton loading, error states, dispatches `SET_DATE` / `SET_SLOT`. |
 | CustomerStep | `steps/customer-step.tsx` | "Who / Your details" — email input with inline validation (via `isValidEmail()` from `src/lib/booking/validation.ts`); error shown on blur; aria attributes for accessibility (Feature #47) |
 | ServiceStep | `steps/service-step.tsx` | "What / Choose a service" — `Layers` icon |
-| ItemsStep | `steps/items-step.tsx` | "Configure / Customize your service" — `SlidersHorizontal` icon |
+| ItemsStep | `steps/items-step.tsx` (Feature #49) | "Configure / Customize your service" — `SlidersHorizontal` icon. Fetches service detail from `GET /api/catalog/services/[id]`, renders dynamic forms (range sliders, value-set selects, boolean switches) for active, visible specs. Seed defaults via `seedDefaults()` and dispatch `SET_ITEM` for each configured value. Shows loading/error/empty states. |
 | ReviewStep | `steps/review-step.tsx` | "Review / Check your booking" — `ClipboardCheck` icon |
 | ConfirmationStep | `steps/confirmation-step.tsx` | "Done / Booking confirmed" — `CheckCircle` icon; triggers footer suppression (last step) |
 
