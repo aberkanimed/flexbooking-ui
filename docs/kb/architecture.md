@@ -20,10 +20,13 @@ src/
       layout.tsx                     # public booking shell — no TopHeader/BottomNav;
                                      #   min-h-dvh flex flex-col bg-background (Feature #45)
       page.tsx                       # renders <BookingShell /> (Server Component wrapper)
+      actions.ts                     # submitBookingAction — Server Action for booking submission (Feature #50)
     api/
       availability/
         dates/route.ts               # GET proxy → backend; validates startDate + days (Feature #46)
         slots/route.ts               # GET proxy → backend; validates date (Feature #46)
+      catalog/
+        services/route.ts            # GET proxies for services list + detail (Features #48, #49)
   components/
     ui/                              # shadcn primitives (base-ui; owned — edit freely)
                                      # includes: calendar.tsx (react-day-picker v9, NOT base-ui),
@@ -31,16 +34,17 @@ src/
     catalog/                         # domain: product-card, service-card, *-detail-hero,
                                      #         rollup-stats, char-cards, services-workbench
     dashboard/                       # shell: top-header, bottom-nav, sidebar-nav, mobile-drawer
-    booking/                         # public booking wizard (Feature #45/46/48):
+    booking/                         # public booking wizard (Features #45/46/48/49/50):
                                      #   booking-shell.tsx (orchestrator), booking-top-bar.tsx,
-                                     #   booking-footer.tsx, step-heading.tsx, slot-grid.tsx,
-                                     #   steps/{date-time,customer,service,items,review,confirmation}-step.tsx
+                                     #   booking-footer.tsx, booking-estimate.tsx, step-heading.tsx, slot-grid.tsx,
+                                     #   steps/{date-time,customer,service,items,review,confirmation}-step.tsx (6 steps)
   lib/
     api/
-      client.ts                      # server-only: BASE_URL + apiFetch<T> (shared by all API modules)
+      client.ts                      # server-only: BASE_URL + apiFetch<T>, apiMutate<T> (shared by all API modules)
       catalog.ts                     # catalog typed helpers — imports apiFetch from client.ts
       availability.ts                # server-only: getAvailableDates / getAvailableSlots (Feature #46)
       availability-types.ts          # client-safe types + AVAILABILITY_WINDOW_DAYS (Feature #46)
+      booking.ts                     # booking types + createBooking mutation; BOOKING_PRODUCT_ID (Feature #50)
     booking/
       types.ts                       # BookingState, BookingAction (discriminated union), StepConfig
       validation.ts                  # Validators like isValidEmail() (Feature #47)
@@ -81,19 +85,20 @@ update it. The shell enforces progression: a step can only advance if its valida
 | 2 | CustomerStep | `steps/customer-step.tsx` | `isValidEmail(email)` | `SET_EMAIL` |
 | 3 | ServiceStep | `steps/service-step.tsx` (Feature #48) | `!!serviceId` | `SET_SERVICE` |
 | 4 | ItemsStep | `steps/items-step.tsx` (Feature #49) | (none) | `SET_SERVICE_DETAIL`, `SET_ITEM` |
-| 5 | ReviewStep | `steps/review-step.tsx` | (none) | (none — read-only) |
-| 6 | ConfirmationStep | `steps/confirmation-step.tsx` | (none) | (none — end state) |
+| 5 | ReviewStep | `steps/review-step.tsx` (Feature #50) | (none) | `SET_BOOKING_RESULT`, `NEXT` (via Server Action) |
+| 6 | ConfirmationStep | `steps/confirmation-step.tsx` (Feature #50) | (none) | (none — end state; read-only display) |
 
 **BookingState** (`src/lib/booking/types.ts`):
 ```ts
 {
   currentStep: number
   date: string | null                         // YYYY-MM-DD
-  slot: AvailableSlotResponse | null
+  slot: string | null                         // HH:MM (arrival time)
   email: string                               // validated before advancing past step 2
   serviceId: string | null                    // service UUID, set by ServiceStep
   serviceDetail: ServiceDetailResponse | null // full service + characteristics (Feature #49)
   configuredItems: Record<string, ConfiguredItem>  // spec ID → { value: string | number }
+  bookingResult: BookingResponse | null       // populated by SET_BOOKING_RESULT (Feature #50); consumed by ConfirmationStep
 }
 ```
 
@@ -102,9 +107,9 @@ update it. The shell enforces progression: a step can only advance if its valida
 { value: string | number }  // user-selected value for a characteristic spec
 ```
 
-**New action** (`SET_SERVICE_DETAIL`, Feature #49): dispatched by `ItemsStep` after fetching service
-detail; also cleared when `SET_SERVICE` advances to a new service. Carries `ServiceDetailResponse`
-with active characteristics only (from `GET /api/catalog/services/[id]`).
+**New actions** (Feature #49–50):
+- `SET_SERVICE_DETAIL`: dispatched by `ItemsStep` after fetching service detail; also cleared when `SET_SERVICE` advances to a new service. Carries `ServiceDetailResponse` with active characteristics only (from `GET /api/catalog/services/[id]`).
+- `SET_BOOKING_RESULT`: dispatched by `ReviewStep` after successful submission via `submitBookingAction` (Feature #50). Carries the `BookingResponse` which seeds `ConfirmationStep` for final display. On error, ReviewStep stores errors locally instead of dispatching.
 
 **When adding a new step:**
 1. Create a file in `src/components/booking/steps/` accepting `{ state, dispatch }` props.
@@ -113,6 +118,22 @@ with active characteristics only (from `GET /api/catalog/services/[id]`).
 4. Add the reducer case in `bookingReducer()`.
 5. Add a validation gate in `canAdvance()` (return `true` to allow auto-advance, or depend on `state`).
 6. Update this table.
+
+### ReviewStep & ConfirmationStep — final submission (Feature #50)
+
+**ReviewStep** (step 5) is the last interactive step:
+- Renders five read-only `SectionCard`s (When/Who/Where-placeholder/Service/Options) + `BookingEstimate` showing line items and total.
+- On **Confirm booking** button click, calls `submitBookingAction(input)` (a Server Action) via `useTransition`.
+- `submitBookingAction` prepares the booking request (customerEmail, date, arrivalTime, serviceName, characteristics via `buildConfiguredItemsPayload`), fetches the product name, calls `createBooking(body)` from `src/lib/api/booking.ts`, and returns a discriminated union: `{ ok: true; booking } | { ok: false; errors }`.
+- On success (`result.ok`), dispatches `SET_BOOKING_RESULT` with the `BookingResponse`, then dispatches `NEXT` to step 6.
+- On failure, stores `result.errors` in local state and renders them as an inline error banner (text-destructive).
+
+**ConfirmationStep** (step 6) is the end state:
+- Read-only display component that renders `state.bookingResult` (seeded by ReviewStep).
+- Shows success icon + heading + confirmation message + rows card with Reference ID, Status, When, Email, Service, Subtotal, Total.
+- `usd` formatter (from `src/lib/booking/pricing.ts`) displays prices in USD (prices from API response are in cents).
+
+**Footer hiding**: `BookingShell` hides the footer (Back/Continue buttons) on steps ≥ 5 (`hideFooter = currentStep >= TOTAL_STEPS - 1`). ReviewStep owns its own submit button; ConfirmationStep is display-only and needs no navigation.
 
 ## Data fetching
 

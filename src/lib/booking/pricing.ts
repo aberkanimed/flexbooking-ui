@@ -3,6 +3,7 @@ import type {
   ServiceDetailResponse,
   CharacteristicSpecificationDetailResponse,
 } from "@/lib/api/catalog"
+import type { CharacteristicItemRequest } from "@/lib/api/booking"
 import type { ConfiguredItem } from "@/lib/booking/types"
 
 export const usd = new Intl.NumberFormat("en-US", {
@@ -103,8 +104,8 @@ export function computeEstimate(
 export function buildConfiguredItemsPayload(
   detail: ServiceDetailResponse,
   configuredItems: Record<string, ConfiguredItem>,
-): { code: string; value: string | number; valueType: string; unit?: string }[] {
-  const result: { code: string; value: string | number; valueType: string; unit?: string }[] = []
+): CharacteristicItemRequest[] {
+  const result: CharacteristicItemRequest[] = []
   for (const spec of detail.characteristics) {
     if (!spec.active) continue
     if (!isSpecVisible(spec, configuredItems)) continue
@@ -115,15 +116,12 @@ export function buildConfiguredItemsPayload(
       if (spec.characteristic.valueType === "BOOLEAN" && value !== "true") continue
       if (spec.range && Number(value) <= 0) continue
     }
-    const entry: { code: string; value: string | number; valueType: string; unit?: string } = {
+    result.push({
       code: spec.code,
-      value,
+      value: String(value),
       valueType: spec.characteristic.valueType,
-    }
-    if (spec.unitOfMeasure && spec.unitOfMeasure !== "NONE") {
-      entry.unit = spec.unitOfMeasure
-    }
-    result.push(entry)
+      unitOfMeasure: spec.unitOfMeasure ?? "NONE",
+    })
   }
   return result
 }

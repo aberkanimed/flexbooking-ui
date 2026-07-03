@@ -1,7 +1,9 @@
 "use client"
 
-import { useReducer } from "react"
+import { useReducer, useTransition } from "react"
 import type { Dispatch } from "react"
+import { submitBookingAction } from "@/app/book/actions"
+import { buildConfiguredItemsPayload } from "@/lib/booking/pricing"
 import type { BookingState, BookingAction } from "@/lib/booking/types"
 import { isValidEmail } from "@/lib/booking/validation"
 import { computeEstimate } from "@/lib/booking/pricing"
@@ -38,6 +40,8 @@ const initialState: BookingState = {
   serviceId: null,
   serviceDetail: null,
   configuredItems: {},
+  bookingResult: null,
+  submitErrors: [],
 }
 
 function bookingReducer(state: BookingState, action: BookingAction): BookingState {
@@ -65,6 +69,10 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
       return state.currentStep > 1
         ? { ...state, currentStep: state.currentStep - 1 }
         : state
+    case "SET_BOOKING_RESULT":
+      return { ...state, bookingResult: action.booking }
+    case "SET_SUBMIT_ERRORS":
+      return { ...state, submitErrors: action.errors }
     case "GO_TO":
       return action.step >= 1 && action.step <= TOTAL_STEPS
         ? { ...state, currentStep: action.step }
@@ -83,13 +91,36 @@ function canAdvance(step: number, state: BookingState): boolean {
 
 export function BookingShell() {
   const [state, dispatch] = useReducer(bookingReducer, initialState)
+  const [isPending, startTransition] = useTransition()
 
   const { currentStep } = state
-  const isLastStep = currentStep === TOTAL_STEPS
   const ActiveStep = STEP_COMPONENTS[currentStep - 1]
+  const hideFooter = currentStep >= TOTAL_STEPS
+  const isReview = currentStep === TOTAL_STEPS - 1
   const estimate = state.serviceDetail
     ? computeEstimate(state.serviceDetail, state.configuredItems)
     : undefined
+
+  function handleConfirm() {
+    const { date, slot, email, serviceDetail, configuredItems } = state
+    if (!date || !slot || !serviceDetail) return
+    dispatch({ type: "SET_SUBMIT_ERRORS", errors: [] })
+    startTransition(async () => {
+      const result = await submitBookingAction({
+        customerEmail: email,
+        date,
+        arrivalTime: slot,
+        serviceName: serviceDetail.name,
+        characteristics: buildConfiguredItemsPayload(serviceDetail, configuredItems),
+      })
+      if (result.ok) {
+        dispatch({ type: "SET_BOOKING_RESULT", booking: result.booking })
+        dispatch({ type: "NEXT" })
+      } else {
+        dispatch({ type: "SET_SUBMIT_ERRORS", errors: result.errors })
+      }
+    })
+  }
 
   return (
     <div className="flex flex-col h-dvh">
@@ -110,8 +141,13 @@ export function BookingShell() {
         canContinue={canAdvance(currentStep, state)}
         onBack={() => dispatch({ type: "PREV" })}
         onContinue={() => dispatch({ type: "NEXT" })}
-        hidden={isLastStep}
-        estimate={estimate}
+        hidden={hideFooter}
+        estimate={isReview ? undefined : estimate}
+        primaryAction={isReview ? {
+          label: isPending ? "Confirming…" : "Confirm booking",
+          onClick: handleConfirm,
+          disabled: isPending,
+        } : undefined}
       />
     </div>
   )

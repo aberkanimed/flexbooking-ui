@@ -73,7 +73,7 @@ live estimates as the user configures items in the ItemsStep.
 | `seedDefaults(detail)` | `ServiceDetailResponse → Record<string, ConfiguredItem>` | Map of spec ID → `{ value }` (seeded to defaults) | Initialize `configuredItems` from service detail when ItemsStep mounts |
 | `isSpecVisible(spec, configuredItems)` | `(spec, Record<string, ConfiguredItem>) → boolean` | `true` if spec has no parents or all parents are configured | Filter specs to render in ItemsStep |
 | `computeEstimate(detail, configuredItems)` | `(detail, Record<string, ConfiguredItem>) → { lineItems, totalCents }` | Array of `{ label, amountCents }` + `totalCents` | Display line-item breakdown + total in `BookingEstimate` component (ReviewStep, BookingFooter) |
-| `buildConfiguredItemsPayload(detail, configuredItems)` | `(detail, Record<string, ConfiguredItem>) → { code, value, valueType, unit? }[]` | Mutably-shaped payload ready for backend | Prepare the `configuredItems` array for submission to the API (used in ConfirmationStep or final mutation) |
+| `buildConfiguredItemsPayload(detail, configuredItems)` | `(detail, Record<string, ConfiguredItem>) → CharacteristicItemRequest[]` | Array of `{ code, value, valueType, unitOfMeasure }` ready for backend submission | Prepare the configured items for the booking request; filters out unselected/inactive items, stringifies values, always includes `unitOfMeasure` (`"NONE"` if absent) |
 | `usd` | `Intl.NumberFormat` | Formatter instance | `usd.format(amountCents / 100)` → `"$12.34"` (tabular figures, two decimals) |
 
 **Pattern: seeding & re-computing on every change:**
@@ -143,8 +143,8 @@ routes — not full server-side API helpers, since client components fetch direc
 | `GET /api/catalog/services/[id]` | `src/app/api/catalog/services/[id]/route.ts` | `getServiceById(id)` | `characteristics.filter((c) => c.active)` | `ServiceDetailResponse` with active specs only |
 
 **Service list (`GET /api/catalog/services`, Feature #48):**
-- Hardcoded `BOOKING_PRODUCT_ID` (`50abefda-704b-4a79-a6dd-046522f89e99`) — the catalog product scoped to public bookings.
-- Calls server-only `getProductById()` from `src/lib/api/catalog.ts`, gets back the full product with nested active and inactive services.
+- Uses `BOOKING_PRODUCT_ID` constant (imported from `src/lib/api/booking`) — the catalog product UUID scoped to public bookings (`50abefda-704b-4a79-a6dd-046522f89e99`).
+- Calls server-only `getProductById(BOOKING_PRODUCT_ID)` from `src/lib/api/catalog.ts`, gets back the full product with nested active and inactive services.
 - Filters to only active services (`service.active === true`) — prevents inactive services from appearing in the UI.
 - Returns the filtered list wrapped in `{ services }` (same shape as other catalog responses).
 - Error handling: returns `{ error: '...' }` with HTTP 502 if the product fetch fails (backend unreachable).
@@ -156,9 +156,9 @@ routes — not full server-side API helpers, since client components fetch direc
 - Error handling: returns `{ error: '...' }` with HTTP 502 if the fetch fails.
 - Used by `ItemsStep` to render dynamic item configuration forms and compute live pricing estimates.
 
-**Future swap point:** `BOOKING_PRODUCT_ID` is hardcoded because bookings are currently scoped to a single product.
+**Future swap point:** `BOOKING_PRODUCT_ID` is a single constant (`src/lib/api/booking.ts`) because bookings are currently scoped to a single product.
 When bookings become per-owner (each owner has their own product), replace the constant with a dynamic lookup
-(e.g. from a request param, a subdomain, or a header) — the route structure stays the same.
+(e.g. from a request param, a subdomain, or a header) — both the route and the Server Action will read the same swap point — the route structure stays the same.
 
 **Client-side usage** (Feature #48 ServiceStep, Feature #49 ItemsStep):
 ```ts
@@ -280,3 +280,43 @@ const spec: CharacteristicSpecificationRequest = {
 
 Follow this shape (validate per-mode, spread conditionally, guarantee one `isDefault`) for any
 future configurable-attribute forms with similar either/or input shapes.
+
+## Booking submission (Feature #50)
+
+The public booking flow completes with a two-tier submission layer:
+
+**API mutation** (`src/lib/api/booking.ts`):
+- `createBooking(body: BookingRequest): Promise<BookingResponse>` — calls `apiMutate<BookingResponse>('/v1/bookings', 'POST', body)`.
+- Request shape: `BookingRequest { customerEmail, productName, date, arrivalTime, notes?, services[] }` where each service is `ServiceSelectionRequest { serviceName, characteristics: CharacteristicItemRequest[] }`.
+- Response: `BookingResponse { id, status, customer, productName, date, arrivalTime, subtotal, total, services, createdAt?, updatedAt? }` with nested `BookingServiceResponse[]` and `BookingItemResponse[]`.
+- Prices in cents; divide by 100 at display edge (see DESIGN.md → Money).
+- Also exports `BOOKING_PRODUCT_ID` constant — the hardcoded product UUID for public bookings (swap point for multi-tenant lookup when needed).
+
+**Server Action** (`src/app/book/actions.ts`):
+- `submitBookingAction(input: SubmitBookingInput): Promise<SubmitBookingResult>` — a `"use server"` function that wraps the API call with error handling.
+- Input: `{ customerEmail, date, arrivalTime, serviceName, characteristics: CharacteristicItemRequest[], notes? }`.
+- Returns a **discriminated union**: `{ ok: true; booking: BookingResponse } | { ok: false; errors: string[] }`.
+- Fetches the product by `BOOKING_PRODUCT_ID` to populate `productName` in the request, then calls `createBooking()`.
+- Catches errors and normalizes to an `errors` array (defaults to the error message or generic fallback).
+
+**Pattern: discriminated-union Server Action results**
+
+Instead of throwing or relying on `try`/`catch` in client code, Server Actions can return a discriminated union that client components pattern-match on:
+
+```ts
+// Server Action returns one of two shapes
+type Result = { ok: true; data: T } | { ok: false; errors: string[] }
+
+// Client component uses it in a transition
+const result = await submitBookingAction(input)
+if (result.ok) {
+  dispatch({ type: 'SET_BOOKING_RESULT', booking: result.booking })
+  dispatch({ type: 'NEXT' })
+} else {
+  setErrors(result.errors)
+}
+```
+
+This avoids thrown exceptions in async contexts and makes error handling explicit. Use this pattern for any future mutations that need user-facing error feedback.
+
+**Integration**: ReviewStep (step 5) calls `submitBookingAction` on button click with `useTransition`, dispatches `SET_BOOKING_RESULT` on success to seed ConfirmationStep (step 6) with the response data, or displays errors inline on failure.
