@@ -92,7 +92,7 @@ export function BookingShell() {
     : undefined
 
   return (
-    <div className="flex flex-1 flex-col min-h-dvh">
+    <div className="flex flex-col h-dvh">
       <BookingTopBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
       {/* Scrollable step area */}
