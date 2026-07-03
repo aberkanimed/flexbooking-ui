@@ -43,13 +43,6 @@ export function ReviewStep({ state, dispatch }: ReviewStepProps) {
   const whenLabel =
     date && slot ? `${formatDate(date)} · ${formatTime(slot)}` : "—"
 
-  const optionsLabel = estimate
-    ? estimate.lineItems
-        .filter((li) => li.label !== "Base price")
-        .map((li) => li.label)
-        .join(" · ") || "No extras selected"
-    : "—"
-
   function handleConfirm() {
     if (!date || !slot || !serviceDetail) return
     setErrors([])
@@ -95,12 +88,6 @@ export function ReviewStep({ state, dispatch }: ReviewStepProps) {
           value={serviceDetail?.name ?? "—"}
           onEdit={() => dispatch({ type: "GO_TO", step: 3 })}
         />
-        <SectionCard
-          label="Options"
-          value={optionsLabel}
-          onEdit={() => dispatch({ type: "GO_TO", step: 4 })}
-        />
-
         {estimate && (
           <div className="bg-card border border-border rounded-[18px] px-[18px] py-4 shadow-card">
             <BookingEstimate

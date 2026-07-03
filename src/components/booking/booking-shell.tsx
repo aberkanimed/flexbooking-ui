@@ -89,8 +89,9 @@ export function BookingShell() {
 
   const { currentStep } = state
   const ActiveStep = STEP_COMPONENTS[currentStep - 1]
-  // Hide footer on Review (step 5) and Confirmation (step 6) — Review owns its own submit button
-  const hideFooter = currentStep >= TOTAL_STEPS - 1
+  // Hide footer only on Confirmation (step 6); Review shows Back only (its own Confirm button covers submit)
+  const hideFooter = currentStep >= TOTAL_STEPS
+  const hideContinue = currentStep === TOTAL_STEPS - 1
   const estimate = state.serviceDetail
     ? computeEstimate(state.serviceDetail, state.configuredItems)
     : undefined
@@ -115,6 +116,7 @@ export function BookingShell() {
         onBack={() => dispatch({ type: "PREV" })}
         onContinue={() => dispatch({ type: "NEXT" })}
         hidden={hideFooter}
+        hideContinue={hideContinue}
         estimate={estimate}
       />
     </div>
