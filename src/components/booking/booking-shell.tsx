@@ -35,6 +35,7 @@ const initialState: BookingState = {
   slot: null,
   email: "",
   serviceId: null,
+  serviceDetail: null,
   configuredItems: {},
 }
 
@@ -47,11 +48,13 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
     case "SET_EMAIL":
       return { ...state, email: action.email }
     case "SET_SERVICE":
-      return { ...state, serviceId: action.serviceId }
+      return { ...state, serviceId: action.serviceId, serviceDetail: null, configuredItems: {} }
+    case "SET_SERVICE_DETAIL":
+      return { ...state, serviceDetail: action.payload }
     case "SET_ITEM":
       return {
         ...state,
-        configuredItems: { ...state.configuredItems, [action.key]: action.value },
+        configuredItems: { ...state.configuredItems, [action.key]: { value: action.value } },
       }
     case "NEXT":
       return state.currentStep < TOTAL_STEPS
