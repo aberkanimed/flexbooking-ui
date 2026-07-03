@@ -2,10 +2,7 @@
 
 import { useState, useEffect, type Dispatch } from "react"
 import type { BookingState, BookingAction } from "@/lib/booking/types"
-import type {
-  CharacteristicSpecificationDetailResponse,
-  ServiceDetailResponse,
-} from "@/lib/api/catalog"
+import type { ServiceDetailResponse } from "@/lib/api/catalog"
 import { StepHeading } from "@/components/booking/step-heading"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
@@ -17,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { isSpecVisible, seedDefaults, usd } from "@/lib/booking/pricing"
+import { isSpecVisible, seedDefaults, usd, unitText } from "@/lib/booking/pricing"
 
 interface ItemsStepProps {
   state: BookingState
@@ -25,15 +22,6 @@ interface ItemsStepProps {
 }
 
 const numFmt = new Intl.NumberFormat("en-US")
-
-function unitSuffix(
-  unit: CharacteristicSpecificationDetailResponse["unitOfMeasure"],
-): string {
-  if (unit === "SQUARE_FOOTAGE") return " sq ft"
-  if (unit === "HOUR") return " hr"
-  if (unit === "MINUTE") return " min"
-  return ""
-}
 
 export function ItemsStep({ state, dispatch }: ItemsStepProps) {
   // Track which serviceId caused a fetch error so it auto-clears on service change
@@ -156,7 +144,7 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
             // number + range → slider (configurable) or read-only
             if (spec.characteristic.valueType === "NUMBER" && spec.range) {
               const numVal = Number(currentValue ?? spec.valueFrom ?? 0)
-              const rateUnit = unitSuffix(spec.unitOfMeasure).trim()
+              const rateUnit = unitText(spec.unitOfMeasure)
               return (
                 <div key={spec.id} className={cardClass}>
                   <div className="flex-1 min-w-0">
@@ -174,8 +162,7 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                   </div>
                   <div className="flex flex-col items-end gap-1.5 w-[200px] flex-none">
                     <span className="font-heading font-bold text-[14px] tabular-nums">
-                      {numFmt.format(numVal)}
-                      {unitSuffix(spec.unitOfMeasure)}
+                      {numFmt.format(numVal)}{unitText(spec.unitOfMeasure) ? ` ${unitText(spec.unitOfMeasure)}` : ""}
                     </span>
                     {spec.configurable ? (
                       <input

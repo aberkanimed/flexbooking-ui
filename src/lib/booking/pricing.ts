@@ -39,8 +39,7 @@ export function seedDefaults(
   return result
 }
 
-// ponytail: inline unit map, same data as unitSuffix in items-step; extract if a third caller appears
-function unitText(u: CharacteristicSpecificationDetailResponse["unitOfMeasure"]): string {
+export function unitText(u: CharacteristicSpecificationDetailResponse["unitOfMeasure"]): string {
   if (u === "SQUARE_FOOTAGE") return "sq ft"
   if (u === "HOUR") return "hr"
   if (u === "MINUTE") return "min"
