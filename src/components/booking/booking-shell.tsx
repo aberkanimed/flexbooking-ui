@@ -4,6 +4,7 @@ import { useReducer } from "react"
 import type { Dispatch } from "react"
 import type { BookingState, BookingAction } from "@/lib/booking/types"
 import { isValidEmail } from "@/lib/booking/validation"
+import { computeEstimate } from "@/lib/booking/pricing"
 import { BookingTopBar } from "@/components/booking/booking-top-bar"
 import { BookingFooter } from "@/components/booking/booking-footer"
 import { DateTimeStep } from "@/components/booking/steps/date-time-step"
@@ -86,6 +87,9 @@ export function BookingShell() {
   const { currentStep } = state
   const isLastStep = currentStep === TOTAL_STEPS
   const ActiveStep = STEP_COMPONENTS[currentStep - 1]
+  const estimate = state.serviceDetail
+    ? computeEstimate(state.serviceDetail, state.configuredItems)
+    : undefined
 
   return (
     <div className="flex flex-1 flex-col min-h-dvh">
@@ -107,6 +111,7 @@ export function BookingShell() {
         onBack={() => dispatch({ type: "PREV" })}
         onContinue={() => dispatch({ type: "NEXT" })}
         hidden={isLastStep}
+        estimate={estimate}
       />
     </div>
   )
