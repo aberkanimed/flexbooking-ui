@@ -79,7 +79,7 @@ export function buildConfiguredItemsPayload(
     if (!spec.active) continue
     if (!isSpecVisible(spec, configuredItems)) continue
     const item = configuredItems[spec.id]
-    const value = item !== undefined ? item.value : (spec.valueFrom ?? "")
+    const value = item !== undefined ? item.value : (spec.valueFrom ?? 0)
     const entry: { code: string; value: string | number; valueType: string; unit?: string } = {
       code: spec.code,
       value,
