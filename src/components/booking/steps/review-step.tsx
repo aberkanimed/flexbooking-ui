@@ -1,12 +1,10 @@
 "use client"
 
-import { useState, useTransition, type Dispatch } from "react"
+import { type Dispatch } from "react"
 import type { BookingState, BookingAction } from "@/lib/booking/types"
 import { StepHeading } from "@/components/booking/step-heading"
 import { BookingEstimate } from "@/components/booking/booking-estimate"
-import { Button } from "@/components/ui/button"
-import { computeEstimate, buildConfiguredItemsPayload } from "@/lib/booking/pricing"
-import { submitBookingAction } from "@/app/book/actions"
+import { computeEstimate } from "@/lib/booking/pricing"
 
 interface ReviewStepProps {
   state: BookingState
@@ -32,9 +30,6 @@ function formatTime(slot: string): string {
 }
 
 export function ReviewStep({ state, dispatch }: ReviewStepProps) {
-  const [errors, setErrors] = useState<string[]>([])
-  const [isPending, startTransition] = useTransition()
-
   const { date, slot, email, serviceDetail, configuredItems } = state
   const estimate = serviceDetail
     ? computeEstimate(serviceDetail, configuredItems)
@@ -42,26 +37,6 @@ export function ReviewStep({ state, dispatch }: ReviewStepProps) {
 
   const whenLabel =
     date && slot ? `${formatDate(date)} · ${formatTime(slot)}` : "—"
-
-  function handleConfirm() {
-    if (!date || !slot || !serviceDetail) return
-    setErrors([])
-    startTransition(async () => {
-      const result = await submitBookingAction({
-        customerEmail: email,
-        date,
-        arrivalTime: slot,
-        serviceName: serviceDetail.name,
-        characteristics: buildConfiguredItemsPayload(serviceDetail, configuredItems),
-      })
-      if (result.ok) {
-        dispatch({ type: "SET_BOOKING_RESULT", booking: result.booking })
-        dispatch({ type: "NEXT" })
-      } else {
-        setErrors(result.errors)
-      }
-    })
-  }
 
   return (
     <>
@@ -97,23 +72,15 @@ export function ReviewStep({ state, dispatch }: ReviewStepProps) {
           </div>
         )}
 
-        {errors.length > 0 && (
+        {state.submitErrors.length > 0 && (
           <div className="rounded-[18px] bg-destructive/10 px-[18px] py-3 flex flex-col gap-1">
-            {errors.map((e, i) => (
+            {state.submitErrors.map((e, i) => (
               <p key={i} className="text-[13px] text-destructive">
                 {e}
               </p>
             ))}
           </div>
         )}
-
-        <Button
-          className="w-full mt-2"
-          disabled={isPending}
-          onClick={handleConfirm}
-        >
-          {isPending ? "Confirming…" : "Confirm booking"}
-        </Button>
       </div>
     </>
   )

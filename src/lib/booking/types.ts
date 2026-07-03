@@ -15,6 +15,7 @@ export interface BookingState {
   serviceDetail: ServiceDetailResponse | null
   configuredItems: Record<string, ConfiguredItem>
   bookingResult: BookingResponse | null
+  submitErrors: string[]
 }
 
 export type BookingAction =
@@ -25,6 +26,7 @@ export type BookingAction =
   | { type: "SET_SERVICE_DETAIL"; payload: ServiceDetailResponse }
   | { type: "SET_ITEM"; key: string; value: string | number }
   | { type: "SET_BOOKING_RESULT"; booking: BookingResponse }
+  | { type: "SET_SUBMIT_ERRORS"; errors: string[] }
   | { type: "NEXT" }
   | { type: "PREV" }
   | { type: "GO_TO"; step: number }

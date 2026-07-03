@@ -13,7 +13,7 @@ interface BookingFooterProps {
   onBack: () => void
   onContinue: () => void
   hidden?: boolean
-  hideContinue?: boolean
+  primaryAction?: { label: string; onClick: () => void; disabled?: boolean }
   estimate?: { lineItems: { label: string; amountCents: number }[]; totalCents: number }
 }
 
@@ -23,7 +23,7 @@ export function BookingFooter({
   onBack,
   onContinue,
   hidden = false,
-  hideContinue = false,
+  primaryAction,
   estimate,
 }: BookingFooterProps) {
   const [open, setOpen] = useState(false)
@@ -71,7 +71,15 @@ export function BookingFooter({
           </div>
         )}
 
-        {!hideContinue && (
+        {primaryAction ? (
+          <Button
+            onClick={primaryAction.onClick}
+            disabled={primaryAction.disabled}
+            className="rounded-full shadow-cta h-[46px] px-6"
+          >
+            {primaryAction.label}
+          </Button>
+        ) : (
           <Button
             onClick={onContinue}
             disabled={!canContinue}
