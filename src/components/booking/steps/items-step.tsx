@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { isSpecVisible, seedDefaults } from "@/lib/booking/pricing"
+import { isSpecVisible, seedDefaults, usd } from "@/lib/booking/pricing"
 
 interface ItemsStepProps {
   state: BookingState
@@ -86,20 +86,20 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
         help="Adjust the options for your chosen service."
       />
 
-      <div className="w-full max-w-[560px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="w-full max-w-[560px] mx-auto flex flex-col gap-3">
         {loading &&
           Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-[58px] rounded-2xl" />
           ))}
 
         {error && (
-          <p className="text-sm text-muted-foreground text-center py-4 md:col-span-2">
+          <p className="text-sm text-muted-foreground text-center py-4">
             Unable to load service options. Please try again.
           </p>
         )}
 
         {!loading && !error && visibleSpecs.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4 md:col-span-2">
+          <p className="text-sm text-muted-foreground text-center py-4">
             No options to configure for this service.
           </p>
         )}
@@ -127,6 +127,9 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                         {desc}
                       </div>
                     )}
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      {usd.format(spec.price / 100)}
+                    </div>
                   </div>
                   <div className="flex-none">
                     {spec.configurable ? (
@@ -153,6 +156,7 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
             // number + range → slider (configurable) or read-only
             if (spec.characteristic.valueType === "NUMBER" && spec.range) {
               const numVal = Number(currentValue ?? spec.valueFrom ?? 0)
+              const rateUnit = unitSuffix(spec.unitOfMeasure).trim()
               return (
                 <div key={spec.id} className={cardClass}>
                   <div className="flex-1 min-w-0">
@@ -164,6 +168,9 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                         {desc}
                       </div>
                     )}
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      {usd.format(spec.price / 100)}{rateUnit ? ` / ${rateUnit}` : ""}
+                    </div>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 w-[200px] flex-none">
                     <span className="font-heading font-bold text-[14px] tabular-nums">
@@ -213,6 +220,9 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                         {desc}
                       </div>
                     )}
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      {usd.format(spec.price / 100)}
+                    </div>
                   </div>
                   <div className="flex-none">
                     {spec.configurable ? (
@@ -226,7 +236,7 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                           })
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="min-w-[160px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -261,6 +271,9 @@ export function ItemsStep({ state, dispatch }: ItemsStepProps) {
                       {desc}
                     </div>
                   )}
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    {usd.format(spec.price / 100)}
+                  </div>
                 </div>
                 <div className="flex-none">
                   <span className="text-sm text-muted-foreground">

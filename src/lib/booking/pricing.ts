@@ -39,6 +39,15 @@ export function seedDefaults(
   return result
 }
 
+// ponytail: inline unit map, same data as unitSuffix in items-step; extract if a third caller appears
+function unitText(u: CharacteristicSpecificationDetailResponse["unitOfMeasure"]): string {
+  if (u === "SQUARE_FOOTAGE") return "sq ft"
+  if (u === "HOUR") return "hr"
+  if (u === "MINUTE") return "min"
+  if (u === "UNIT") return "unit"
+  return ""
+}
+
 export function computeEstimate(
   detail: ServiceDetailResponse,
   configuredItems: Record<string, ConfiguredItem>,
@@ -52,28 +61,40 @@ export function computeEstimate(
     if (!isSpecVisible(spec, configuredItems)) continue
 
     const name = spec.characteristic.name
+    const uom = unitText(spec.unitOfMeasure)
     let amountCents: number
+    let label: string
 
     if (!spec.configurable) {
       // Non-configurable: operator default, always included
-      amountCents = spec.range
-        ? spec.price * (spec.valueFrom ?? 0)
-        : spec.price
+      if (spec.range) {
+        amountCents = spec.price * (spec.valueFrom ?? 0)
+        const qty = spec.valueFrom ?? 0
+        label = uom ? `${name} — ${qty} ${uom}` : name
+      } else {
+        amountCents = spec.price
+        label = name
+      }
     } else if (spec.range) {
       // Configurable range: exclude when qty is 0
       const qty = Number(configuredItems[spec.id]?.value ?? spec.valueFrom ?? 0)
       if (qty <= 0) continue
       amountCents = spec.price * qty
+      label = uom ? `${name} — ${qty} ${uom}` : `${name} — ${qty}`
     } else if (spec.characteristic.valueType === "BOOLEAN") {
       // Configurable boolean: exclude when off
       if (configuredItems[spec.id]?.value !== "true") continue
       amountCents = spec.price
+      label = name
     } else {
       // Configurable value-set (string): always included
       amountCents = spec.price
+      const selectedVal = String(configuredItems[spec.id]?.value ?? "")
+      const optionName = spec.values.find((v) => v.value === selectedVal)?.value ?? selectedVal
+      label = optionName ? `${name} — ${optionName}` : name
     }
 
-    lineItems.push({ label: name, amountCents })
+    lineItems.push({ label, amountCents })
   }
 
   const totalCents = lineItems.reduce((sum, li) => sum + li.amountCents, 0)
