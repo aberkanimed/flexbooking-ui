@@ -80,7 +80,7 @@ update it. The shell enforces progression: a step can only advance if its valida
 | 1 | DateTimeStep | `steps/date-time-step.tsx` | `date && slot` | `SET_DATE`, `SET_SLOT` |
 | 2 | CustomerStep | `steps/customer-step.tsx` | `isValidEmail(email)` | `SET_EMAIL` |
 | 3 | ServiceStep | `steps/service-step.tsx` (Feature #48) | `!!serviceId` | `SET_SERVICE` |
-| 4 | ItemsStep | `steps/items-step.tsx` | (none) | `SET_ITEM` |
+| 4 | ItemsStep | `steps/items-step.tsx` (Feature #49) | (none) | `SET_SERVICE_DETAIL`, `SET_ITEM` |
 | 5 | ReviewStep | `steps/review-step.tsx` | (none) | (none — read-only) |
 | 6 | ConfirmationStep | `steps/confirmation-step.tsx` | (none) | (none — end state) |
 
@@ -88,13 +88,23 @@ update it. The shell enforces progression: a step can only advance if its valida
 ```ts
 {
   currentStep: number
-  date: string | null       // YYYY-MM-DD
+  date: string | null                         // YYYY-MM-DD
   slot: AvailableSlotResponse | null
-  email: string             // validated before advancing past step 2
-  serviceId: string | null  // service UUID, set by ServiceStep
-  configuredItems: Record<string, unknown>  // itemKey → user-configured values
+  email: string                               // validated before advancing past step 2
+  serviceId: string | null                    // service UUID, set by ServiceStep
+  serviceDetail: ServiceDetailResponse | null // full service + characteristics (Feature #49)
+  configuredItems: Record<string, ConfiguredItem>  // spec ID → { value: string | number }
 }
 ```
+
+**`ConfiguredItem`** (`src/lib/booking/types.ts`):
+```ts
+{ value: string | number }  // user-selected value for a characteristic spec
+```
+
+**New action** (`SET_SERVICE_DETAIL`, Feature #49): dispatched by `ItemsStep` after fetching service
+detail; also cleared when `SET_SERVICE` advances to a new service. Carries `ServiceDetailResponse`
+with active characteristics only (from `GET /api/catalog/services/[id]`).
 
 **When adding a new step:**
 1. Create a file in `src/components/booking/steps/` accepting `{ state, dispatch }` props.

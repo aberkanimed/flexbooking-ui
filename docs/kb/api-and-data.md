@@ -42,10 +42,63 @@ Two related but distinct entities appear throughout the catalog domain:
 
 A `CharacteristicSpecificationDetailResponse` carries a nested `characteristic: CharacteristicResponse` field — this is a back-reference to the template, not the specification itself. Always use `spec.id` when the operation targets the specification (e.g., removing it from a service); use `spec.characteristic.id` only when the operation targets the underlying item template.
 
+### Characteristic relationships & conditional visibility (Feature #49)
+
+A specification may declare **parent relationships** — dependencies on other specs that must be configured first. `CharacteristicSpecificationDetailResponse` has an optional `parentRelationships?: CharacteristicRelationshipParentResponse[]` field containing `{ id: string, code: string, relationshipType: string }` tuples.
+
+**Usage in booking flow:**
+
+The `isSpecVisible(spec, configuredItems): boolean` helper in `src/lib/booking/pricing.ts` checks whether a spec is currently renderable by testing whether all its parent relationships exist in the configured items map. If a spec has no parents, it's always visible. This enables conditional spec reveal in the ItemsStep without backend round-trips:
+
+```ts
+const visibleSpecs = serviceDetail.characteristics.filter(
+  (spec) => spec.active && isSpecVisible(spec, configuredItems)
+)
+```
+
+When a parent spec's value changes, all dependent children are re-evaluated for visibility on the next render. No separate mutation is needed — the visibility logic is stateless.
+
 Response model (abridged): `ProductResponse {id, name, description, active}` ·
 `ServiceResponse` adds `basePrice` · `ProductDetailResponse` adds `services: ServiceDetailResponse[]` ·
 services carry `characteristics: CharacteristicSpecificationDetailResponse[]`. **Prices are integers
 in cents** — divide by 100 at the display edge (see `DESIGN.md` → Money).
+
+## Booking pricing utilities (Feature #49)
+
+Client-safe pricing helpers live in `src/lib/booking/pricing.ts` (no server-only imports). They compute
+live estimates as the user configures items in the ItemsStep.
+
+| Helper | Signature | Returns | Use for |
+|---|---|---|---|
+| `seedDefaults(detail)` | `ServiceDetailResponse → Record<string, ConfiguredItem>` | Map of spec ID → `{ value }` (seeded to defaults) | Initialize `configuredItems` from service detail when ItemsStep mounts |
+| `isSpecVisible(spec, configuredItems)` | `(spec, Record<string, ConfiguredItem>) → boolean` | `true` if spec has no parents or all parents are configured | Filter specs to render in ItemsStep |
+| `computeEstimate(detail, configuredItems)` | `(detail, Record<string, ConfiguredItem>) → { lineItems, totalCents }` | Array of `{ label, amountCents }` + `totalCents` | Display line-item breakdown + total in `BookingEstimate` component (ReviewStep, BookingFooter) |
+| `buildConfiguredItemsPayload(detail, configuredItems)` | `(detail, Record<string, ConfiguredItem>) → { code, value, valueType, unit? }[]` | Mutably-shaped payload ready for backend | Prepare the `configuredItems` array for submission to the API (used in ConfirmationStep or final mutation) |
+| `usd` | `Intl.NumberFormat` | Formatter instance | `usd.format(amountCents / 100)` → `"$12.34"` (tabular figures, two decimals) |
+
+**Pattern: seeding & re-computing on every change:**
+
+```ts
+// ItemsStep mounts — fetch detail and seed defaults
+useEffect(() => {
+  fetch(`/api/catalog/services/${serviceId}`)
+    .then((res) => res.json() as Promise<ServiceDetailResponse>)
+    .then((detail) => {
+      dispatch({ type: "SET_SERVICE_DETAIL", payload: detail })
+      const defaults = seedDefaults(detail)
+      for (const [key, item] of Object.entries(defaults)) {
+        dispatch({ type: "SET_ITEM", key, value: item.value })
+      }
+    })
+}, [serviceId])
+
+// Whenever configuredItems change, recompute estimate
+const estimate = computeEstimate(serviceDetail, configuredItems)
+```
+
+All helpers are pure functions with no side effects or dependencies on global state — they accept
+service detail + configured items and return computed values synchronously. This enables live,
+responsive estimate updates as the user adjusts sliders and selections.
 
 ## Availability helpers (Feature #46)
 
@@ -77,37 +130,51 @@ into a `*-types.ts` file with no server-only imports. The server module imports 
 components import types from the same file. Follow this pattern for any future API domain that has
 client-side consumers.
 
-## Services route for booking (Feature #48)
+## Services routes for booking (Features #48, #49)
 
-Public booking flow fetches available services via a lightweight Next.js proxy route — not a full
-server-side API helper, since client components fetch directly with `fetch()`.
+Public booking flow fetches available services and service details via lightweight Next.js proxy
+routes — not full server-side API helpers, since client components fetch directly with `fetch()`.
 
-**Route handler** (simple filter proxy):
+**Route handlers:**
 
 | Route | File | Fetches | Filters | Returns |
 |---|---|---|---|---|
 | `GET /api/catalog/services` | `src/app/api/catalog/services/route.ts` | `getProductById(BOOKING_PRODUCT_ID)` | `services.filter((s) => s.active)` | `{ services: ServiceResponse[] }` |
+| `GET /api/catalog/services/[id]` | `src/app/api/catalog/services/[id]/route.ts` | `getServiceById(id)` | `characteristics.filter((c) => c.active)` | `ServiceDetailResponse` with active specs only |
 
-**How it works:**
+**Service list (`GET /api/catalog/services`, Feature #48):**
 - Hardcoded `BOOKING_PRODUCT_ID` (`50abefda-704b-4a79-a6dd-046522f89e99`) — the catalog product scoped to public bookings.
 - Calls server-only `getProductById()` from `src/lib/api/catalog.ts`, gets back the full product with nested active and inactive services.
-- Filters to only active services (e.g. `service.active === true`) — prevents inactive services from appearing in the UI.
+- Filters to only active services (`service.active === true`) — prevents inactive services from appearing in the UI.
 - Returns the filtered list wrapped in `{ services }` (same shape as other catalog responses).
 - Error handling: returns `{ error: '...' }` with HTTP 502 if the product fetch fails (backend unreachable).
+
+**Service detail with characteristics (`GET /api/catalog/services/[id]`, Feature #49):**
+- Fetches a single service by ID from the backend.
+- Filters nested characteristics to only active specs (`characteristics.filter((c) => c.active)`).
+- Returns `ServiceDetailResponse` with the filtered active characteristics only.
+- Error handling: returns `{ error: '...' }` with HTTP 502 if the fetch fails.
+- Used by `ItemsStep` to render dynamic item configuration forms and compute live pricing estimates.
 
 **Future swap point:** `BOOKING_PRODUCT_ID` is hardcoded because bookings are currently scoped to a single product.
 When bookings become per-owner (each owner has their own product), replace the constant with a dynamic lookup
 (e.g. from a request param, a subdomain, or a header) — the route structure stays the same.
 
-**Client-side usage** (Feature #48 ServiceStep):
+**Client-side usage** (Feature #48 ServiceStep, Feature #49 ItemsStep):
 ```ts
+// Fetch active services for step 3 (ServiceStep):
 fetch("/api/catalog/services")
   .then((res) => res.json() as Promise<{ services: ServiceResponse[] }>)
   .then((data) => setServices(data.services))
+
+// Fetch service detail with characteristics for step 4 (ItemsStep):
+fetch(`/api/catalog/services/${serviceId}`)
+  .then((res) => res.json() as Promise<ServiceDetailResponse>)
+  .then((detail) => dispatch({ type: "SET_SERVICE_DETAIL", payload: detail }))
 ```
 
-The step is a client component because it holds the loading/selected/error state; the route handler is server-only
-(validates and filters server-side before the response leaves the API layer).
+Both routes are client-accessible; the route handlers validate and filter server-side before the response
+leaves the API layer. The steps hold loading/selected/error state as client components.
 
 ## Adding a read helper
 

@@ -1,4 +1,9 @@
 import type { LucideIcon } from "lucide-react"
+import type { ServiceDetailResponse } from "@/lib/api/catalog"
+
+export interface ConfiguredItem {
+  value: string | number
+}
 
 export interface BookingState {
   currentStep: number
@@ -6,7 +11,8 @@ export interface BookingState {
   slot: string | null
   email: string
   serviceId: string | null
-  configuredItems: Record<string, unknown>
+  serviceDetail: ServiceDetailResponse | null
+  configuredItems: Record<string, ConfiguredItem>
 }
 
 export type BookingAction =
@@ -14,7 +20,8 @@ export type BookingAction =
   | { type: "SET_SLOT"; slot: string | null }
   | { type: "SET_EMAIL"; email: string }
   | { type: "SET_SERVICE"; serviceId: string }
-  | { type: "SET_ITEM"; key: string; value: unknown }
+  | { type: "SET_SERVICE_DETAIL"; payload: ServiceDetailResponse }
+  | { type: "SET_ITEM"; key: string; value: string | number }
   | { type: "NEXT" }
   | { type: "PREV" }
   | { type: "GO_TO"; step: number }

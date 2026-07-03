@@ -4,6 +4,7 @@ import { useReducer } from "react"
 import type { Dispatch } from "react"
 import type { BookingState, BookingAction } from "@/lib/booking/types"
 import { isValidEmail } from "@/lib/booking/validation"
+import { computeEstimate } from "@/lib/booking/pricing"
 import { BookingTopBar } from "@/components/booking/booking-top-bar"
 import { BookingFooter } from "@/components/booking/booking-footer"
 import { DateTimeStep } from "@/components/booking/steps/date-time-step"
@@ -35,6 +36,7 @@ const initialState: BookingState = {
   slot: null,
   email: "",
   serviceId: null,
+  serviceDetail: null,
   configuredItems: {},
 }
 
@@ -47,11 +49,13 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
     case "SET_EMAIL":
       return { ...state, email: action.email }
     case "SET_SERVICE":
-      return { ...state, serviceId: action.serviceId }
+      return { ...state, serviceId: action.serviceId, serviceDetail: null, configuredItems: {} }
+    case "SET_SERVICE_DETAIL":
+      return { ...state, serviceDetail: action.payload }
     case "SET_ITEM":
       return {
         ...state,
-        configuredItems: { ...state.configuredItems, [action.key]: action.value },
+        configuredItems: { ...state.configuredItems, [action.key]: { value: action.value } },
       }
     case "NEXT":
       return state.currentStep < TOTAL_STEPS
@@ -83,9 +87,12 @@ export function BookingShell() {
   const { currentStep } = state
   const isLastStep = currentStep === TOTAL_STEPS
   const ActiveStep = STEP_COMPONENTS[currentStep - 1]
+  const estimate = state.serviceDetail
+    ? computeEstimate(state.serviceDetail, state.configuredItems)
+    : undefined
 
   return (
-    <div className="flex flex-1 flex-col min-h-dvh">
+    <div className="flex flex-col h-dvh">
       <BookingTopBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
       {/* Scrollable step area */}
@@ -104,6 +111,7 @@ export function BookingShell() {
         onBack={() => dispatch({ type: "PREV" })}
         onContinue={() => dispatch({ type: "NEXT" })}
         hidden={isLastStep}
+        estimate={estimate}
       />
     </div>
   )

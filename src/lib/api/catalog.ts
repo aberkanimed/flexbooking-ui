@@ -30,6 +30,12 @@ export interface CharacteristicResponse {
   active: boolean
 }
 
+export interface CharacteristicRelationshipParentResponse {
+  id: string
+  code: string
+  relationshipType: string
+}
+
 export interface CharacteristicSpecificationDetailResponse {
   id: string
   code: string
@@ -42,6 +48,7 @@ export interface CharacteristicSpecificationDetailResponse {
   valueFrom: number | null
   valueTo: number | null
   values: CharacteristicValueResponse[]
+  parentRelationships?: CharacteristicRelationshipParentResponse[]
 }
 
 export interface ServiceDetailResponse extends ServiceResponse {
